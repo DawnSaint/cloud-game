@@ -1,0 +1,32 @@
+{
+  "name": "cloud-game-platform",
+  "version": "1.0.0",
+  "description": "桌游平台后端 - 支持阿瓦隆等游戏",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "keywords": [
+    "koa",
+    "mongodb",
+    "socket.io",
+    "avalon",
+    "board-game"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@koa/cors": "^5.0.0",
+    "dotenv": "^16.4.1",
+    "koa": "^2.15.0",
+    "koa-bodyparser": "^4.4.1",
+    "koa-router": "^12.0.1",
+    "mongoose": "^8.1.0",
+    "socket.io": "^4.6.1",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}

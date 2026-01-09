@@ -1,0 +1,8 @@
+{
+  "watch": ["src", "app.js", ".env"],
+  "ext": "js,json",
+  "ignore": ["test/*", "**/*.test.js"],
+  "exec": "node app.js",
+  "delay": "1000",
+  "legacyWatch": true
+}
