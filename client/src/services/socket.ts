@@ -5,7 +5,7 @@ class SocketService {
   private socket: Socket | null = null
   private listeners: Map<string, Function[]> = new Map()
 
-  connect(url: string = 'http://localhost:3000') {
+  connect(url: string = `${window.location.protocol}//${window.location.hostname}:3000`) {
     if (this.socket?.connected) {
       return this.socket
     }

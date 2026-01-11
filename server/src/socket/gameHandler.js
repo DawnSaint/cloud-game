@@ -54,7 +54,7 @@ const handleGameEvents = (io, socket) => {
 
       // 广播游戏开始和公开状态
       io.to(roomId).emit('game_started', {
-        publicState: game.getPublicState()
+        state: game.getPublicState()
       });
 
       logger.info(`Game started in room ${roomId}`);

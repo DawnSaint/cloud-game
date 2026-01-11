@@ -1,13 +1,25 @@
 <template>
   <div class="game-room-container">
     <div class="room-header">
-      <h1>{{ room?.name || '房间' }}</h1>
+      <div class="room-title-section">
+        <h1>{{ room?.name || '房间' }}</h1>
+        <div v-if="!loading && room" class="room-meta">
+          <span class="room-game-type">{{ room.gameType || '阿瓦隆' }}</span>
+          <span class="room-status" :class="room.status">{{ gameStatusText }}</span>
+        </div>
+      </div>
       <button @click="handleLeaveRoom" class="btn-leave">离开房间</button>
     </div>
 
     <div v-if="error" class="error">{{ error }}</div>
 
-    <div class="game-content">
+    <!-- Loading 状态 -->
+    <div v-if="loading" class="loading-container">
+      <div class="spinner"></div>
+      <p>加载房间信息中...</p>
+    </div>
+
+    <div v-else class="game-content">
       <!-- 玩家列表 -->
       <div class="players-section">
         <h2>玩家列表 ({{ room?.players.length }}/{{ room?.maxPlayers }})</h2>
@@ -17,50 +29,50 @@
             :key="player.userId"
             class="player-card"
             :class="{
-              host: player.isHost,
+              host: player.userId === room?.host,
               ready: player.isReady,
               current: player.userId === currentUserId
             }"
           >
-            <div class="player-name">
-              {{ player.username }}
-              <span v-if="player.isHost" class="badge">房主</span>
-              <span v-if="player.userId === currentUserId" class="badge">我</span>
-            </div>
-            <div class="player-status">
-              {{ player.isReady ? '已准备' : '未准备' }}
+            <div class="player-info">
+              <div class="player-name">
+                {{ player.username }}
+                <span v-if="player.userId === room?.host" class="badge">房主</span>
+              </div>
+              <div v-if="player.userId === currentUserId && room?.status === 'waiting'">
+                <button
+                  v-if="player.userId !== room?.host"
+                  @click="handleToggleReady"
+                  class="btn-action"
+                  :class="{ ready: player.isReady }"
+                >
+                  {{ player.isReady ? '取消准备' : '准备' }}
+                </button>
+
+                <button
+                  v-else
+                  @click="handleStartGame"
+                  class="btn-action btn-start"
+                  :disabled="!canStartGame"
+                >
+                  开始游戏
+                </button>
+              </div>
+              <div v-else class="player-status">
+                {{ player.isReady ? '已准备' : '未准备' }}
+              </div>
             </div>
           </div>
         </div>
+
+        <!-- 房主提示 -->
+        <p v-if="isHost && room?.status === 'waiting' && !canStartGame" class="hint">
+          需要 {{ minPlayers }}-{{ room?.maxPlayers }} 名玩家且所有玩家准备后才能开始
+        </p>
       </div>
 
       <!-- 游戏信息和控制 -->
       <div class="game-section">
-        <h2>游戏状态: {{ gameStatusText }}</h2>
-
-        <div v-if="room?.status === 'waiting'" class="waiting-controls">
-          <button
-            v-if="!isHost"
-            @click="handleToggleReady"
-            class="btn-primary btn-large"
-            :class="{ ready: isCurrentPlayerReady }"
-          >
-            {{ isCurrentPlayerReady ? '取消准备' : '准备' }}
-          </button>
-
-          <button
-            v-if="isHost"
-            @click="handleStartGame"
-            class="btn-primary btn-large"
-            :disabled="!canStartGame"
-          >
-            开始游戏
-          </button>
-
-          <p v-if="isHost && !canStartGame" class="hint">
-            需要 {{ minPlayers }}-{{ room?.maxPlayers }} 名玩家且所有玩家准备后才能开始
-          </p>
-        </div>
 
         <!-- 游戏中的信息展示 -->
         <div v-if="room?.status === 'playing'" class="game-info">
@@ -77,7 +89,7 @@
             <h3>任务结果</h3>
             <div class="mission-results">
               <span
-                v-for="(result, index) in 5"
+                v-for="(_, index) in 5"
                 :key="index"
                 class="mission-dot"
                 :class="{
@@ -115,7 +127,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import socketService from '../services/socket'
-import { roomApi } from '../services/api'
 import type { Room, GameState } from '../types'
 import { useRouter } from 'vue-router'
 const props = defineProps<{
@@ -129,23 +140,20 @@ const gameState = ref<GameState | null>(null)
 const error = ref('')
 const messages = ref<Array<{ text: string; type: string }>>([])
 const messagesList = ref<HTMLElement>()
+const loading = ref(true)
 
 const currentUserId = localStorage.getItem('userId') || ''
-// const currentUsername = localStorage.getItem('username') || ''
+const currentUsername = localStorage.getItem('username') || ''
 const minPlayers = 5
 
 const isHost = computed(() => {
   return currentUserId == room.value?.host
 })
 
-const isCurrentPlayerReady = computed(() => {
-  return room.value?.players.find(p => p.userId === currentUserId)?.isReady || false
-})
-
 const canStartGame = computed(() => {
   if (!room.value) return false
   const playerCount = room.value.players.length
-  const allReady = room.value.players.every(p => p.isHost || p.isReady)
+  const allReady = room.value.players.every(p => p.userId === room.value?.host || p.isReady)
   return playerCount >= minPlayers && playerCount <= room.value.maxPlayers && allReady
 })
 
@@ -171,19 +179,28 @@ const addMessage = (text: string, type: string = 'info') => {
   })
 }
 
-const loadRoomInfo = async () => {
-  try {
-    room.value = await roomApi.getRoomDetail(props.roomId)
-  } catch (err: any) {
-    error.value = err.message || '加载房间信息失败'
-  }
-}
+// const loadRoomInfo = async () => {
+//   try {
+//     room.value = await roomApi.getRoomDetail(props.roomId)
+//   } catch (err: any) {
+//     error.value = err.message || '加载房间信息失败'
+//   }
+// }
 
 const loadGameState = () => {
   socketService.getGameState(props.roomId, currentUserId)
 }
 
 const handleToggleReady = () => {
+  // 乐观更新：立即切换本地状态
+  if (room.value) {
+    const currentPlayer = room.value.players.find(p => p.userId === currentUserId)
+    if (currentPlayer) {
+      currentPlayer.isReady = !currentPlayer.isReady
+    }
+  }
+
+  // 发送请求到服务器（如果服务器返回不同的状态，会通过 room_updated 事件自动修正）
   socketService.toggleReady(props.roomId, currentUserId)
 }
 
@@ -192,20 +209,17 @@ const handleStartGame = () => {
   socketService.startGame(props.roomId, currentUserId)
 }
 
-const handleLeaveRoom = () => {
-  socketService.leaveRoom(props.roomId, currentUserId)
+const handleLeaveRoom = async () => {
+  await socketService.leaveRoom(props.roomId, currentUserId)
   router.push('/room-list')
 }
 
 // Socket 事件监听
 const setupSocketListeners = () => {
-  socketService.on('joined_room', (data: any) => {
-    room.value = data
-  })
-
 
   socketService.on('room_updated', (data: any) => {
     room.value = data
+    loading.value = false
   })
 
   socketService.on('role_assigned', (data: any) => {
@@ -217,8 +231,9 @@ const setupSocketListeners = () => {
 
   socketService.on('game_started', (data: any) => {
     addMessage('游戏开始!', 'success')
-    if (data.gameState) {
-      gameState.value = data.gameState
+    if (data.state) {
+      gameState.value = data.state
+      room.value!.status = 'playing'
     }
   })
 
@@ -260,19 +275,31 @@ const setupSocketListeners = () => {
   })
 }
 
+// 处理页面关闭/刷新时的清理
+const handlePageUnload = () => {
+  socketService.offAll()
+}
+
 onMounted(async () => {
-  await loadRoomInfo()
+  // await loadRoomInfo()
 
   // 连接 Socket
-  socketService.connect()
+  await socketService.connect()
+  socketService.joinRoom(props.roomId, currentUserId, currentUsername)
   setupSocketListeners()
 
   addMessage('已连接到房间', 'success')
+
+  // 监听页面关闭/刷新事件
+  window.addEventListener('beforeunload', handlePageUnload)
 })
 
 onUnmounted(() => {
-  socketService.leaveRoom(props.roomId, currentUserId)
-  socketService.offAll()
+  // 移除页面关闭监听
+  window.removeEventListener('beforeunload', handlePageUnload)
+
+  // 执行清理
+  handlePageUnload()
 })
 </script>
 
@@ -288,6 +315,52 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+}
+
+.room-title-section {
+  display: flex;
+}
+
+.room-title-section h1 {
+  margin: 0;
+}
+
+.room-meta {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-left: 1rem;
+}
+
+.room-game-type {
+  padding: 0.25rem 0.75rem;
+  background: #667eea;
+  color: white;
+  border-radius: 15px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.room-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 15px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.room-status.waiting {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.room-status.playing {
+  background: #d4edda;
+  color: #155724;
+}
+
+.room-status.finished {
+  background: #f8d7da;
+  color: #721c24;
 }
 
 .btn-leave {
@@ -310,6 +383,37 @@ onUnmounted(() => {
   padding: 1rem;
   border-radius: 5px;
   margin-bottom: 1rem;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-container p {
+  color: #666;
+  font-size: 1rem;
 }
 
 .game-content {
@@ -340,6 +444,7 @@ onUnmounted(() => {
   background: #f8f9fa;
   border-radius: 5px;
   border: 2px solid transparent;
+  gap: 1rem;
 }
 
 .player-card.current {
@@ -351,11 +456,24 @@ onUnmounted(() => {
   background: #d4edda;
 }
 
+.player-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+  gap: 1rem;
+}
+
 .player-name {
   font-weight: 500;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.player-status {
+  color: #666;
+  font-size: 0.9rem;
 }
 
 .badge {
@@ -366,8 +484,48 @@ onUnmounted(() => {
   font-size: 0.75rem;
 }
 
-.waiting-controls {
-  margin: 2rem 0;
+.badge-me {
+  background: #27ae60;
+}
+
+.btn-action {
+  padding: 0.5rem 1rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.btn-action:hover:not(:disabled) {
+  background: #5568d3;
+  transform: translateY(-1px);
+}
+
+.btn-action:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-action.ready {
+  background: #27ae60;
+}
+
+.btn-action.ready:hover {
+  background: #229954;
+}
+
+.btn-action.btn-start {
+  background: #f39c12;
+  font-weight: 500;
+}
+
+.btn-action.btn-start:hover:not(:disabled) {
+  background: #e67e22;
 }
 
 .btn-primary {
@@ -394,13 +552,6 @@ onUnmounted(() => {
   background: #27ae60;
 }
 
-.btn-large {
-  width: 100%;
-  padding: 1rem;
-  font-size: 1.1rem;
-  margin-bottom: 1rem;
-}
-
 .btn-secondary {
   padding: 0.75rem 1.5rem;
   background: #e0e0e0;
@@ -419,7 +570,11 @@ onUnmounted(() => {
 .hint {
   color: #666;
   font-size: 0.9rem;
-  text-align: center;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: #fff3cd;
+  border-radius: 5px;
+  border-left: 3px solid #f39c12;
 }
 
 .game-info {
@@ -465,17 +620,9 @@ onUnmounted(() => {
   color: white;
 }
 
-.messages-section {
-  margin-top: 2rem;
-}
-
 .messages-list {
   max-height: 300px;
   overflow-y: auto;
-  border: 1px solid #e0e0e0;
-  border-radius: 5px;
-  padding: 1rem;
-  background: #f8f9fa;
 }
 
 .message {
@@ -515,5 +662,12 @@ onUnmounted(() => {
   .game-content {
     grid-template-columns: 1fr;
   }
+
+  .player-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
 }
 </style>

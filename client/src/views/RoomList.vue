@@ -214,8 +214,8 @@ onMounted(() => {
 .error,
 .empty {
   text-align: center;
-  padding: 2rem;
-  font-size: 1.1rem;
+  padding-top: 4rem;
+  font-size: 1.2rem;
 }
 
 .error {

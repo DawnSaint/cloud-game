@@ -19,18 +19,12 @@ const handleRoomEvents = (io, socket) => {
         return;
       }
 
-      if (room.status !== 'waiting') {
+      const existingPlayer = room.players.find(p => p.userId.toString() === userId);
+
+      if (room.status !== 'waiting' && !existingPlayer) {
         socket.emit('error', { message: 'Room is not available' });
         return;
       }
-
-      if (room.players.length >= room.maxPlayers) {
-        socket.emit('error', { message: 'Room is full' });
-        return;
-      }
-
-      // 检查玩家是否已经在房间中
-      const existingPlayer = room.players.find(p => p.userId.toString() === userId);
 
       if (existingPlayer) {
         existingPlayer.socketId = socket.id;
@@ -49,20 +43,20 @@ const handleRoomEvents = (io, socket) => {
       socket.join(roomId);
 
       // 通知客户端加入成功
-      socket.emit('joined_room', {
-        success: true,
-        room: {
-          id: room._id,
-          name: room.name,
-          players: room.players.map(p => ({
-            userId: p.userId,
-            username: p.username,
-            isReady: p.isReady
-          })),
-          maxPlayers: room.maxPlayers,
-          status: room.status
-        }
-      });
+      // socket.emit('joined_room', {
+      //   success: true,
+      //   room: {
+      //     id: room._id,
+      //     name: room.name,
+      //     players: room.players.map(p => ({
+      //       userId: p.userId,
+      //       username: p.username,
+      //       isReady: p.isReady
+      //     })),
+      //     maxPlayers: room.maxPlayers,
+      //     status: room.status
+      //   }
+      // });
 
       // 广播房间更新
       io.to(roomId).emit('room_updated', room);

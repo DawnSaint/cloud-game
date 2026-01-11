@@ -48,10 +48,12 @@ class AvalonGame {
     const player = this.state.roles[playerIndex];
     const vision = getPlayerVision(player.role, this.state.roles);
 
-    const visiblePlayers = vision.map(idx => ({
-      username: this.state.roles[idx].username,
-      userId: this.state.roles[idx].userId
-    }));
+    // const visiblePlayers = vision.map(idx => ({
+    //   username: this.state.roles[idx].username,
+    //   userId: this.state.roles[idx].userId
+    // }));
+
+    const visiblePlayers = vision.map(idx => this.state.roles[idx].username);
 
     return {
       role: player.role,

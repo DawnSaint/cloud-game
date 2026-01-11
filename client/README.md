@@ -55,7 +55,7 @@ npm run build
 ```
 cloud_game_client/
 ├── src/
-│   ├── components/         # Vue 组件
+│   ├── views/              # Vue 页面
 │   │   ├── LoginView.vue   # 登录页面
 │   │   ├── RoomList.vue    # 房间列表
 │   │   └── GameRoom.vue    # 游戏房间

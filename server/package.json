@@ -1,7 +1,7 @@
 {
   "name": "cloud-game-platform",
   "version": "1.0.0",
-  "description": "桌游平台后端 - 支持阿瓦隆等游戏",
+  "description": "桌游平台后端",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
@@ -11,7 +11,6 @@
     "koa",
     "mongodb",
     "socket.io",
-    "avalon",
     "board-game"
   ],
   "author": "",
