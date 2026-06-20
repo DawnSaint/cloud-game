@@ -1,0 +1,19 @@
+@mixin text-overflow($lines) {
+  @content;
+  display: -webkit-box;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: $lines;
+}
+
+$s3ImagesPath: 'https://storage.yandexcloud.net/avalon-game/images/';
+$s3IconsPath: 'https://storage.yandexcloud.net/avalon-game/icons/';
+
+@function getImagePathByID($type, $id) {
+  @return url('#{$s3ImagesPath}#{$type}/#{$id}.webp');
+}
+
+@function getIconPathByName($name) {
+  @return url('#{$s3IconsPath}#{$name}');
+}

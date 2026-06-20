@@ -1,0 +1,15 @@
+{
+  "name": "@avalon/types",
+  "version": "57.2.1",
+  "description": "Typings for sharing between ui and backend",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "@Razdva122",
+  "license": "ISC",
+  "dependencies": {
+    "@typegoose/typegoose": "^12.11.0",
+    "mongoose": "^8.10.1"
+  }
+}
