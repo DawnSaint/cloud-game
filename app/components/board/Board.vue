@@ -7,7 +7,7 @@
       <span v-if="roomStage === 'created' || roomStage === 'locked'" class="waiting-text"
         >等待玩家加入 {{ players.length }}/10</span
       >
-      <slot name="host-panel"></slot>
+      <slot name="host-panel"/>
     </div>
 
     <!-- 玩家圆形布局 -->

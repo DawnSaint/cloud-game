@@ -9,7 +9,7 @@
   >
     <!-- 胜负标识 -->
     <div class="game-result">
-      <img class="result-icon" :src="resultIcon" mode="aspectFit" />
+      <img class="result-icon" :src="resultIcon" mode="aspectFit" >
       <span class="result-text">{{ isPlayerWin ? '胜利' : '失败' }}</span>
     </div>
 
@@ -43,7 +43,7 @@
 
     <!-- 阵营标识 -->
     <div class="camp-badge">
-      <img class="camp-icon" :src="campIcon" mode="aspectFit" />
+      <img class="camp-icon" :src="campIcon" mode="aspectFit" >
     </div>
   </div>
 </template>

@@ -12,7 +12,7 @@
       <!-- 进度条 -->
       <div v-if="shouldShowProgress" class="achievement-progress">
         <div class="progress-bar">
-          <div class="progress-fill" :style="{ width: progressPercentage + '%' }"></div>
+          <div class="progress-fill" :style="{ width: progressPercentage + '%' }"/>
         </div>
         <span class="progress-text">
           {{ achievement.progress.currentValue }} / {{ achievement.progress.maxValue }}
@@ -192,7 +192,7 @@ const getRoleName = (role: string): string => {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, $primary 0%, color.adjust($primary, $lightness: 15%) 100%);
+  background: linear-gradient(90deg, $primary 0%, $primary-light-15 100%);
   transition: width $transition-normal;
 }
 

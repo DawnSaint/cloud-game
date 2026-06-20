@@ -15,7 +15,7 @@
         <div class="summary-content">
           <div class="summary-progress">
             <div class="progress-bar">
-              <div class="progress-fill" :style="{ width: completionPercentage + '%' }"></div>
+              <div class="progress-fill" :style="{ width: completionPercentage + '%' }"/>
             </div>
           </div>
           <div class="summary-stats">
@@ -41,7 +41,7 @@
             v-for="achievement in hiddenAchievements"
             :key="achievement.id"
             :achievement="achievement"
-            :isHidden="true"
+            :is-hidden="true"
           />
         </div>
       </div>
@@ -201,7 +201,7 @@ onMounted(() => {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, $primary 0%, color.adjust($primary, $lightness: 15%) 100%);
+  background: linear-gradient(90deg, $primary 0%, $primary-light-15 100%);
   transition: width $transition-normal;
 }
 

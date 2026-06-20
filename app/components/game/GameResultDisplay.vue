@@ -3,7 +3,7 @@
     <div class="result-header">
       <span class="result-title">游戏结束</span>
       <div class="winner-content">
-        <img class="winner-icon" :src="winnerIcon" mode="aspectFit" />
+        <img class="winner-icon" :src="winnerIcon" mode="aspectFit" >
         <span class="winner-text">{{ winnerText }} 胜利!</span>
       </div>
       <span v-if="result.reason" class="reason-text">{{ reasonText }}</span>

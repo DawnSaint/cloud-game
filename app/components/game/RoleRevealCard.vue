@@ -10,7 +10,7 @@
     </div>
 
     <div class="loyalty-badge" :class="`badge-${player.loyalty}`">
-      <img class="loyalty-icon" :src="loyaltyIcon" mode="aspectFit" />
+      <img class="loyalty-icon" :src="loyaltyIcon" mode="aspectFit" >
       <span>{{ loyaltyText }}</span>
     </div>
   </div>

@@ -204,14 +204,14 @@ const handleRestartGame = async () => {
 
 .hint-text {
   padding: $spacing-md;
-  background-color: color.adjust($warning, $lightness: 40%);
+  background-color: $warning-light-40;
   border-radius: $radius-medium;
   margin-bottom: 5px;
 }
 
 .hint-text text {
   font-size: $font-sm;
-  color: color.adjust($warning, $lightness: -30%);
+  color: $warning-dark-30;
 }
 
 .action-btn {

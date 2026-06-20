@@ -32,7 +32,7 @@
     <!-- Loading -->
     <div v-if="uiState.loading.visible" class="loading-overlay" :class="{ 'loading-mask': uiState.loading.mask }">
       <div class="loading-box">
-        <div class="loading-spinner"></div>
+        <div class="loading-spinner"/>
         <span v-if="uiState.loading.title" class="loading-title">{{ uiState.loading.title }}</span>
       </div>
     </div>

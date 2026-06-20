@@ -18,7 +18,7 @@
           </div>
         </div>
         <div class="progress-bar">
-          <div class="progress-fill" :style="{ width: completionPercentage + '%' }"></div>
+          <div class="progress-fill" :style="{ width: completionPercentage + '%' }"/>
         </div>
       </div>
 
@@ -194,7 +194,7 @@ onMounted(() => {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: linear-gradient(135deg, $primary 0%, color.adjust($primary, $lightness: 20%) 100%);
+  background: linear-gradient(135deg, $primary 0%, $primary-light-20 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -217,7 +217,7 @@ onMounted(() => {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, $primary 0%, color.adjust($primary, $lightness: 15%) 100%);
+  background: linear-gradient(90deg, $primary 0%, $primary-light-15 100%);
   transition: width $transition-normal;
   border-radius: $radius-small;
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="nickname-form">
     <button class="avatar-button" @click="onChooseAvatar">
-      <img v-if="avatarUrl" :src="avatarUrl" class="avatar-preview" mode="aspectFill" />
+      <img v-if="avatarUrl" :src="avatarUrl" class="avatar-preview" mode="aspectFill" >
       <span v-else class="avatar-placeholder">点击选择头像</span>
     </button>
 
@@ -13,14 +13,14 @@
       placeholder="请输入昵称"
       maxlength="20"
       @confirm="handleConfirm"
-    />
+    >
 
     <!-- 确认按钮 -->
     <button
       class="confirm-btn"
       :class="{ disabled: !canConfirm }"
-      @click="handleConfirm"
       :disabled="!canConfirm || loading"
+      @click="handleConfirm"
     >
       {{ loading ? '登录中...' : '完成' }}
     </button>

@@ -7,6 +7,12 @@ $info: #2196f3; // 信息 - 蓝色
 $success: #4caf50; // 成功 - 绿色
 $warning: #fb8c00; // 警告 - 橙色
 
+// ========== 预计算色值变体（替代 legacy lighten/darken） ==========
+$primary-light-15: #5a9de6; // lighten($primary, 15%)
+$primary-light-20: #73aee8; // lighten($primary, 20%)
+$warning-light-40: #fdd8a0; // lighten($warning, 40%)
+$warning-dark-30: #b06200;  // darken($warning, 30%)
+
 // ========== 文本颜色 ==========
 $text-primary: #333333; // 主文本
 $text-secondary: #666666; // 次要文本

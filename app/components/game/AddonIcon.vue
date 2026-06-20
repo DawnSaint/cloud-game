@@ -1,7 +1,7 @@
 <template>
   <div class="addon-icon-wrapper">
     <div class="addon-icon" :class="`icon-${addonType}`">
-      <img v-if="iconSrc" :src="iconSrc" class="addon-image" mode="aspectFit" />
+      <img v-if="iconSrc" :src="iconSrc" class="addon-image" mode="aspectFit" >
     </div>
     <span v-if="showLabel" class="addon-label">{{ addonLabel }}</span>
   </div>

@@ -20,7 +20,7 @@
                 <span class="stat-label">评分</span>
                 <span class="stat-value">{{ displayRating }}</span>
               </div>
-              <div class="stat-divider"></div>
+              <div class="stat-divider"/>
               <div class="stat-item">
                 <span class="stat-label">胜率</span>
                 <span class="stat-value" :class="winrateClass">{{ displayWinrate }}</span>
@@ -62,7 +62,7 @@
         </div>
 
         <div v-if="formMode === 'login'" class="form-body">
-          <input v-model="loginForm.login" class="form-input" placeholder="用户名或邮箱" :disabled="loginLoading" />
+          <input v-model="loginForm.login" class="form-input" placeholder="用户名或邮箱" :disabled="loginLoading" >
           <input
             v-model="loginForm.password"
             class="form-input"
@@ -70,29 +70,29 @@
             placeholder="密码"
             :disabled="loginLoading"
             @keyup.enter="handleLogin"
-          />
+          >
           <button class="form-btn" :disabled="loginLoading" @click="handleLogin">
             {{ loginLoading ? '登录中...' : '登录' }}
           </button>
         </div>
 
         <div v-else class="form-body">
-          <input v-model="registerForm.login" class="form-input" placeholder="用户名" :disabled="loginLoading" />
-          <input v-model="registerForm.name" class="form-input" placeholder="昵称" :disabled="loginLoading" />
+          <input v-model="registerForm.login" class="form-input" placeholder="用户名" :disabled="loginLoading" >
+          <input v-model="registerForm.name" class="form-input" placeholder="昵称" :disabled="loginLoading" >
           <input
             v-model="registerForm.email"
             class="form-input"
             type="email"
             placeholder="邮箱"
             :disabled="loginLoading"
-          />
+          >
           <input
             v-model="registerForm.password"
             class="form-input"
             type="password"
             placeholder="密码"
             :disabled="loginLoading"
-          />
+          >
           <button class="form-btn" :disabled="loginLoading" @click="handleRegister">
             {{ loginLoading ? '注册中...' : '注册' }}
           </button>

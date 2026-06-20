@@ -13,10 +13,13 @@
 | 前端 | Vue 3.5+ (Composition API) | `<script setup>` |
 | 构建 | Vite 8 | Nuxt 内置，开发环境秒级热更新 |
 | 类型 | TypeScript | 严格模式 |
-| 样式 | 待定 | |
-| 状态管理 | 待定 | Pinia 或 Nuxt 内置 useState/useAsyncData |
-| 实时通信 | 待定 | 原生 WebSocket / SSE / Socket.IO |
-| 数据库 | 待定 | |
+| 样式 | SCSS | Vite 预处理器 + 全局主题变量注入 |
+| 状态管理 | Pinia | 配合 Nuxt 插件 |
+| 实时通信 | WebSocket (原生) | `useSocket.ts` 封装，计划迁移至 Socket.IO |
+| 测试 | Vitest | 单元测试 + 集成测试 |
+| 类型检查 | vue-tsc | `--noEmit` 模式 |
+| 代码规范 | @nuxt/eslint | Flat config，AI 开发风格统一 |
+| 数据库 | MongoDB | 沿用上游方案 |
 | 部署 | 待定 | Node.js / Vercel / Docker |
 
 ---

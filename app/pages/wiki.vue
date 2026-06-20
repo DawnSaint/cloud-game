@@ -28,12 +28,12 @@
           <!-- 阵营标识展示 -->
           <div class="camp-badges">
             <div class="camp-badge-item">
-              <img class="camp-badge-icon" :src="getImage('core/blue_team_no_background.webp')" mode="aspectFit" />
+              <img class="camp-badge-icon" :src="getImage('core/blue_team_no_background.webp')" mode="aspectFit" >
               <span class="camp-badge-label">善良方（蓝方）</span>
               <span class="condition-item">胜利条件：3个任务成功且梅林或恋人没有被刺杀</span>
             </div>
             <div class="camp-badge-item">
-              <img class="camp-badge-icon" :src="getImage('core/red_team_no_background.webp')" mode="aspectFit" />
+              <img class="camp-badge-icon" :src="getImage('core/red_team_no_background.webp')" mode="aspectFit" >
               <span class="camp-badge-label">邪恶方（红方）</span>
               <span class="condition-item">胜利条件：3个任务失败 / 连续 5 次流局 / 刺杀梅林或恋人</span>
             </div>
@@ -44,7 +44,7 @@
           <!-- 梅林 -->
 
           <div class="role-detail">
-            <img class="role-avatar" :src="getRoleImage('merlin')" mode="aspectFit" />
+            <img class="role-avatar" :src="getRoleImage('merlin')" mode="aspectFit" >
             <div class="role-content">
               <div class="role-header">
                 <span class="role-title">梅林 (Merlin)</span>
@@ -59,7 +59,7 @@
           <!-- 派西维尔 -->
 
           <div class="role-detail">
-            <img class="role-avatar" :src="getRoleImage('percival')" mode="aspectFit" />
+            <img class="role-avatar" :src="getRoleImage('percival')" mode="aspectFit" >
             <div class="role-content">
               <div class="role-header">
                 <span class="role-title">派西维尔 (Percival)</span>
@@ -73,7 +73,7 @@
           <!-- 忠臣 -->
 
           <div class="role-detail">
-            <img class="role-avatar" :src="getRoleImage('servant')" mode="aspectFit" />
+            <img class="role-avatar" :src="getRoleImage('servant')" mode="aspectFit" >
             <div class="role-content">
               <div class="role-header">
                 <span class="role-title">忠臣 (Servant)</span>
@@ -87,7 +87,7 @@
 
           <!-- 莫甘娜 -->
           <div class="role-detail">
-            <img class="role-avatar" :src="getRoleImage('morgana')" mode="aspectFit" />
+            <img class="role-avatar" :src="getRoleImage('morgana')" mode="aspectFit" >
             <div class="role-content">
               <div class="role-header">
                 <span class="role-title">莫甘娜 (Morgana)</span>
@@ -101,7 +101,7 @@
 
           <!-- 爪牙 -->
           <div class="role-detail">
-            <img class="role-avatar" :src="getRoleImage('minion')" mode="aspectFit" />
+            <img class="role-avatar" :src="getRoleImage('minion')" mode="aspectFit" >
             <div class="role-content">
               <div class="role-header">
                 <span class="role-title">爪牙 (Minion)</span>
@@ -115,7 +115,7 @@
 
           <!-- 莫德雷德 -->
           <div class="role-detail">
-            <img class="role-avatar" :src="getRoleImage('mordred')" mode="aspectFit" />
+            <img class="role-avatar" :src="getRoleImage('mordred')" mode="aspectFit" >
             <div class="role-content">
               <div class="role-header">
                 <span class="role-title">莫德雷德 (Mordred)</span>
@@ -129,7 +129,7 @@
 
           <!-- 奥伯伦 -->
           <div class="role-detail">
-            <img class="role-avatar" :src="getRoleImage('oberon')" mode="aspectFit" />
+            <img class="role-avatar" :src="getRoleImage('oberon')" mode="aspectFit" >
             <div class="role-content">
               <div class="role-header">
                 <span class="role-title">奥伯伦 (Oberon)</span>
@@ -213,7 +213,7 @@
 
             <!-- 队长标识展示 -->
             <div class="leader-badge">
-              <img class="leader-crown-icon" :src="getImage('core/crown.webp')" mode="aspectFit" />
+              <img class="leader-crown-icon" :src="getImage('core/crown.webp')" mode="aspectFit" >
               <span class="leader-badge-label">当前队长（领袖）标识</span>
             </div>
           </div>
@@ -293,7 +293,7 @@
         <div v-if="expandedSections.expansionRoles" class="section-body">
           <!-- 善良兰斯洛特 -->
           <div class="role-detail good">
-            <img class="role-avatar" :src="getRoleImage('good_lancelot')" mode="aspectFit" />
+            <img class="role-avatar" :src="getRoleImage('good_lancelot')" mode="aspectFit" >
             <div class="role-content">
               <div class="role-header">
                 <span class="role-title">兰斯洛特 (Lancelot)</span>
@@ -313,7 +313,7 @@
 
           <!-- 邪恶兰斯洛特 -->
           <div class="role-detail evil">
-            <img class="role-avatar" :src="getRoleImage('evil_lancelot')" mode="aspectFit" />
+            <img class="role-avatar" :src="getRoleImage('evil_lancelot')" mode="aspectFit" >
             <div class="role-content">
               <div class="role-header">
                 <span class="role-title">兰斯洛特 (Evil Lancelot)</span>
@@ -333,7 +333,7 @@
 
           <!-- 女皇 -->
           <div class="role-detail good">
-            <img class="role-avatar" :src="getRoleImage('guinevere')" mode="aspectFit" />
+            <img class="role-avatar" :src="getRoleImage('guinevere')" mode="aspectFit" >
             <div class="role-content">
               <div class="role-header">
                 <span class="role-title">女皇 (Guinevere)</span>
@@ -353,7 +353,7 @@
 
           <!-- 牧师 -->
           <div class="role-detail good">
-            <img class="role-avatar" :src="getRoleImage('cleric')" mode="aspectFit" />
+            <img class="role-avatar" :src="getRoleImage('cleric')" mode="aspectFit" >
             <div class="role-content">
               <div class="role-header">
                 <span class="role-title">牧师 (Cleric)</span>
@@ -373,7 +373,7 @@
 
           <!-- 特里斯坦 -->
           <div class="role-detail good">
-            <img class="role-avatar" :src="getRoleImage('tristan')" mode="aspectFit" />
+            <img class="role-avatar" :src="getRoleImage('tristan')" mode="aspectFit" >
             <div class="role-content">
               <div class="role-header">
                 <span class="role-title">特里斯坦 (Tristan)</span>
@@ -393,7 +393,7 @@
 
           <!-- 伊索德 -->
           <div class="role-detail good">
-            <img class="role-avatar" :src="getRoleImage('isolde')" mode="aspectFit" />
+            <img class="role-avatar" :src="getRoleImage('isolde')" mode="aspectFit" >
             <div class="role-content">
               <div class="role-header">
                 <span class="role-title">伊索德 (Isolde)</span>
@@ -413,7 +413,7 @@
 
           <!-- 麻烦友 -->
           <div class="role-detail good">
-            <img class="role-avatar" :src="getRoleImage('troublemaker')" mode="aspectFit" />
+            <img class="role-avatar" :src="getRoleImage('troublemaker')" mode="aspectFit" >
             <div class="role-content">
               <div class="role-header">
                 <span class="role-title">捣蛋鬼 (Troublemaker)</span>
@@ -433,7 +433,7 @@
 
           <!-- 骗子 -->
           <div class="role-detail evil">
-            <img class="role-avatar" :src="getRoleImage('trickster')" mode="aspectFit" />
+            <img class="role-avatar" :src="getRoleImage('trickster')" mode="aspectFit" >
             <div class="role-content">
               <div class="role-header">
                 <span class="role-title">骗子 (Trickster)</span>
@@ -453,7 +453,7 @@
 
           <!-- 女巫 -->
           <div class="role-detail evil">
-            <img class="role-avatar" :src="getRoleImage('witch')" mode="aspectFit" />
+            <img class="role-avatar" :src="getRoleImage('witch')" mode="aspectFit" >
             <div class="role-content">
               <div class="role-header">
                 <span class="role-title">女巫 (Witch)</span>
@@ -473,7 +473,7 @@
 
           <!-- 揭秘者 -->
           <div class="role-detail evil">
-            <img class="role-avatar" :src="getRoleImage('revealer')" mode="aspectFit" />
+            <img class="role-avatar" :src="getRoleImage('revealer')" mode="aspectFit" >
             <div class="role-content">
               <div class="role-header">
                 <span class="role-title">揭秘者 (Revealer)</span>
@@ -493,7 +493,7 @@
 
           <!-- 疯子 -->
           <div class="role-detail evil">
-            <img class="role-avatar" :src="getRoleImage('lunatic')" mode="aspectFit" />
+            <img class="role-avatar" :src="getRoleImage('lunatic')" mode="aspectFit" >
             <div class="role-content">
               <div class="role-header">
                 <span class="role-title">疯子 (Lunatic)</span>
@@ -513,7 +513,7 @@
 
           <!-- 莽夫 -->
           <div class="role-detail evil">
-            <img class="role-avatar" :src="getRoleImage('brute')" mode="aspectFit" />
+            <img class="role-avatar" :src="getRoleImage('brute')" mode="aspectFit" >
             <div class="role-content">
               <div class="role-header">
                 <span class="role-title">莽夫 (Brute)</span>
@@ -542,7 +542,7 @@
 
         <div v-if="expandedSections.expansionModes" class="section-body">
           <div class="role-detail">
-            <img class="role-avatar" :src="getImage('features/lady_of_lake.webp')" mode="aspectFit" />
+            <img class="role-avatar" :src="getImage('features/lady_of_lake.webp')" mode="aspectFit" >
             <div class="role-content">
               <div class="role-header">
                 <span class="role-title">湖中女神 (Lady of the Lake)</span>
@@ -554,7 +554,7 @@
           </div>
 
           <div class="role-detail">
-            <img class="role-avatar" :src="getImage('features/excalibur.webp')" mode="aspectFit" />
+            <img class="role-avatar" :src="getImage('features/excalibur.webp')" mode="aspectFit" >
             <div class="role-content">
               <div class="role-header">
                 <span class="role-title">圣剑 (Excalibur)</span>
@@ -566,7 +566,7 @@
           </div>
 
           <div class="role-detail">
-            <img class="role-avatar" :src="getImage('features/lady_of_sea.webp')" mode="aspectFit" />
+            <img class="role-avatar" :src="getImage('features/lady_of_sea.webp')" mode="aspectFit" >
             <div class="role-content">
               <div class="role-header">
                 <span class="role-title">海之女神 (Lady of the Sea)</span>
@@ -578,7 +578,7 @@
           </div>
 
           <div class="role-detail">
-            <img class="role-avatar" :src="getImage('features/plot_cards.webp')" mode="aspectFit" />
+            <img class="role-avatar" :src="getImage('features/plot_cards.webp')" mode="aspectFit" >
             <div class="role-content">
               <div class="role-header">
                 <span class="role-title">剧情卡 (Plot Cards)</span>

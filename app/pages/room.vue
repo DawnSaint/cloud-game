@@ -23,7 +23,7 @@
           :can-select-player="canSelectPlayer"
           @player-click="handlePlayerClick"
         >
-          <template v-slot:host-panel>
+          <template #host-panel>
             <div v-if="isRoomLeader" class="board-actions">
               <button
                 v-if="roomState.stage === 'created' || roomState.stage === 'locked'"

@@ -3,7 +3,7 @@
     <!-- 玩家框架 -->
     <div class="player-frame">
       <!-- 玩家边框装饰 -->
-      <img class="player-frame-image" src="/static/images/core/player-frame.webp" mode="aspectFit" />
+      <img class="player-frame-image" src="/static/images/core/player-frame.webp" mode="aspectFit" >
 
       <!-- 玩家头像/图标 -->
       <div class="player-avatar">
@@ -11,10 +11,10 @@
       </div>
 
       <!-- 领袖标识 -->
-      <img v-if="isLeader" class="player-crown" src="/static/images/core/crown.webp" mode="aspectFit" />
+      <img v-if="isLeader" class="player-crown" src="/static/images/core/crown.webp" mode="aspectFit" >
 
       <!-- 选中标识 -->
-      <div v-if="isSelected" class="selected-indicator"></div>
+      <div v-if="isSelected" class="selected-indicator"/>
 
       <!-- 玩家名称 -->
       <div class="player-name-container">{{ displayName }}</div>

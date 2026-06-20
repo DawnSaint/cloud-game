@@ -15,7 +15,7 @@
         <div class="game-container">
           <div class="game-left">
             <div class="game-name">
-              <span v-if="game.result?.winner" :class="`${game.result.winner}-loyalty-icon`"></span>
+              <span v-if="game.result?.winner" :class="`${game.result.winner}-loyalty-icon`"/>
               <span class="host-name">{{ roomsListHosts[index] || '加载中...' }}</span>
             </div>
             <div v-if="hasOptions(game.options)" class="options-preview">

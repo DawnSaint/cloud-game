@@ -32,6 +32,7 @@ cloud-game/
     db/              # 数据库层
     utils/           # 服务端工具
   docs/              # 项目文档
+  tests/             # 自动化测试（按模块分子目录）
   nuxt.config.ts
   package.json
 ```
@@ -69,10 +70,13 @@ git subtree pull --prefix=_reference upstream master --squash
 | 服务端 | Nitro | API routes, middleware, WebSocket |
 | 前端 | Vue 3.5+ (Composition API) | `<script setup>` |
 | 类型 | TypeScript | 严格模式 |
-| 样式 | 待定 | |
-| 状态管理 | 待定 | Pinia 或 Nuxt 内置 useState |
-| 实时通信 | 待定 | WebSocket 或 SSE |
-| 数据库 | 待定 | |
+| 测试 | Vitest | 单元测试 + 集成测试 |
+| 类型检查 | vue-tsc | `--noEmit` 模式 |
+| 样式 | SCSS | Vite 预处理器 + 全局主题变量 |
+| 状态管理 | Pinia | 配合 Nuxt 插件 |
+| 实时通信 | WebSocket (原生) | `useSocket.ts` 封装，计划迁移至 Socket.IO |
+| 代码规范 | @nuxt/eslint | Flat config，AI 开发风格统一 |
+| 数据库 | MongoDB | 沿用上游方案 |
 
 ## 代码规范
 
@@ -81,6 +85,7 @@ git subtree pull --prefix=_reference upstream master --squash
 - **命名**: 变量/函数用 camelCase，类/类型用 PascalCase，常量用 UPPER_CASE，文件名用 kebab-case
 - **提交格式**: 见下方「Commit Message 格式规约」
 - **Vue**: 新组件使用 Composition API + `<script setup>`
+- **文档与注释**: 简洁精确，只写关键点（为什么这样做、隐藏约束、非显而易见的权衡）。不重复代码已表达的信息，不写大段说明、背景铺垫或示例废话。宁可少一行也不多一行。
 
 ### Commit Message 格式规约
 
@@ -121,6 +126,66 @@ npm version <level> -f -m <commit message>
 
 - `<level>` 为 `patch` / `minor` / `major`，由用户指定或根据改动范围判断
 - 完成后提醒用户 `git push --follow-tags` 推送 commit 和 tag
+
+## 测试规范
+
+完整方案见 `docs/testing.md`。以下为 AI 编码助手必须遵守的约束。
+
+### 工具与脚本
+
+| 脚本 | 命令 | 用途 |
+|---|---|---|
+| `npm run test` | `vitest run` | 运行全部测试 |
+| `npm run test:watch` | `vitest` | 监听模式 |
+| `npm run typecheck` | `vue-tsc --noEmit` | 类型检查 |
+
+- **测试框架**: Vitest
+- **类型检查**: vue-tsc
+- **配置文件**: `vitest.config.ts`
+
+### 测试目录结构
+
+```
+tests/
+  setup.ts                    # 全局 mock
+  utils/                      # 工具函数测试
+  composables/                # 组合式函数测试
+  stores/                     # Pinia Store 测试
+  game/                       # 服务端游戏引擎测试
+  components/                 # Vue 组件测试
+```
+
+测试文件命名：`<source-name>.test.ts`，与被测模块一一对应。
+
+### 测试约束（必须遵守）
+
+1. **新增业务逻辑必须带测试** —— 修改 `app/utils/`、`server/game/` 等核心文件时，改动必须包含对应的 `*.test.ts`。
+2. **Bug 修复先写失败用例** —— 修复 bug 时，先添加一条能复现该 bug 的失败测试用例，再修复代码使其通过。
+3. **新增角色 / 游戏阶段必须同步测试** —— 游戏引擎每新增一个角色或阶段，必须在对应测试文件中补充 case。
+4. **外部依赖一律 mock** —— Socket（`useSocket`）、localStorage、WebSocket 等外部依赖在测试中用 `vi.mock` / `vi.stubGlobal` 替换。
+5. **测试描述用行为句式** —— 用 `it('连续 5 次投票拒绝时邪恶方获胜', ...)` 而非 `it('test vote')`。
+
+## 文档同步规范
+
+任务完成后，必须检查以下文档是否需要同步更新，**不允许"先做功能、后补文档"**。
+
+### 需要维护的文档
+
+| 文档 | 路径 | 同步时机 |
+|---|---|---|
+| 项目上下文 | `AGENTS.md` | 技术栈变更、新增目录结构、新增开发约束时 |
+| 架构文档 | `docs/architecture.md` | 架构决策变更、新增核心模块、目录结构调整时 |
+| 路线图 | `docs/roadmap.md` | 完成某个阶段的功能后，勾选对应 checkbox |
+| 变更日志 | `docs/changelog.md` | 每次有用户可感知的功能变更时记录 |
+| 测试方案 | `docs/testing.md` | 测试阶段推进、新增测试层或策略调整时 |
+
+### 同步规则
+
+1. **技术栈变更立即更新** —— 新增、替换或移除依赖（如引入数据库、确定通信方案）时，同步更新 `AGENTS.md` 和 `docs/architecture.md` 的技术栈表格。
+2. **目录结构变更立即更新** —— 新增顶层目录或重要子目录时，同步更新 `AGENTS.md` 的项目结构。
+3. **功能完成勾选路线图** —— 完成 `docs/roadmap.md` 中某个待办项后，将 `[ ]` 改为 `[x]`。
+4. **开发约束新增即写入** —— 新增编码规范、测试约束、提交规范等，写入 `AGENTS.md` 对应章节。
+5. **不确定是否该更新时，更新** —— 宁可文档多一行冗余信息，也不要让文档与代码脱节。
 
 ## 开发环境
 
