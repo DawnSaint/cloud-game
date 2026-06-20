@@ -1,0 +1,105 @@
+// ========== 主题颜色 ==========
+$primary: #1976d2; // 主色 - 蓝色
+$secondary: #424242; // 次要色 - 深灰
+$accent: #82b1ff; // 强调色 - 浅蓝
+$error: #c8000f; // 错误 - 红色
+$info: #2196f3; // 信息 - 蓝色
+$success: #4caf50; // 成功 - 绿色
+$warning: #fb8c00; // 警告 - 橙色
+
+// ========== 文本颜色 ==========
+$text-primary: #333333; // 主文本
+$text-secondary: #666666; // 次要文本
+$text-disabled: #999999; // 禁用文本
+$text-white: #ffffff; // 白色文本
+
+// ========== 背景颜色 (Light Theme - 极简风格) ==========
+$bg: #ffffff;
+$bg-page: $bg;
+$bg-card: transparent;
+$inset: transparent;
+$bg-hover: rgba(0, 0, 0, 0.05); // 通用悬停背景 - 轻微变暗
+
+// ========== 阵营颜色 ==========
+$loyalty-good: #1976d2; // 好人 - 蓝色
+$loyalty-good-bg: #e3f2fd; // 好人背景色
+$loyalty-evil: #c8000f; // 坏人 - 红色
+$loyalty-evil-bg: #ffebee; // 坏人背景色
+
+// 游戏结束效果
+$game-end-good: #1976d2; // 好人胜利 - 蓝色
+$game-end-evil: #c8000f; // 坏人胜利 - 红色
+
+// ========== 玩家状态颜色 ==========
+$player-leader: #ffd700; // 领袖 - 金色
+$player-selected: #4cd964; // 选中 - 绿色
+$player-sent: #ff9500; // 派遣 - 橙色
+$player-wait: #ff3b30; // 等待操作 - 红色
+
+// ========== UI 元素颜色 ==========
+$border-color: #e0e0e0; // 边框
+$border-light: #f0f0f0; // 浅边框
+$shadow-light: rgba(0, 0, 0, 0.05);
+$shadow-normal: rgba(0, 0, 0, 0.1);
+$shadow-heavy: rgba(0, 0, 0, 0.15);
+
+// ========== 按钮颜色 (极简纯文字样式) ==========
+$btn-primary: transparent; // 主按钮透明背景
+$btn-primary-text: $text-primary;
+$btn-secondary: transparent; // 次要按钮透明背景
+$btn-secondary-text: $text-secondary;
+$btn-disabled: transparent;
+$btn-disabled-text: #999999;
+
+// ========== 阴影效果 ==========
+@mixin shadow-card {
+  box-shadow: 0 1px 4px $shadow-light;
+}
+
+@mixin shadow-elevated {
+  box-shadow: 0 2px 6px $shadow-normal;
+}
+
+@mixin shadow-floating {
+  box-shadow: 0 4px 12px $shadow-normal;
+}
+
+// 游戏结束阴影效果（与原项目一致）
+@mixin game-end-shadow($color) {
+  box-shadow:
+    rgba($color, 0.4) 4px 4px,
+    rgba($color, 0.3) 8px 8px,
+    rgba($color, 0.2) 12px 12px,
+    rgba($color, 0.1) 16px 16px,
+    rgba($color, 0.05) 20px 20px;
+}
+
+// ========== 过渡动画 ==========
+$transition-fast: 0.2s ease;
+$transition-normal: 0.3s ease;
+$transition-slow: 0.5s ease;
+
+// ========== 圆角 (与原UI的12px一致) ==========
+$radius-small: 4px;
+$radius-medium: 6px; // 原UI主要使用12px
+$radius-large: 8px;
+$radius-xlarge: 12px;
+
+// ========== 间距 ==========
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 12px;
+$spacing-lg: 16px;
+$spacing-xl: 20px;
+$spacing-xxl: 24px;
+$spacing-xxxl: 32px;
+$spacing-header: 80px;
+
+// ========== 字体大小 ==========
+$font-xs: 11px;
+$font-sm: 12px;
+$font-md: 14px;
+$font-lg: 16px;
+$font-xl: 18px;
+$font-xxl: 24px;
+$font-xxxl: 32px;
