@@ -1,0 +1,15 @@
+{
+  "name": "cloud-game",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "nuxt-nightly": "^5.0.0-29699187.9208a469"
+  }
+}
