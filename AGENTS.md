@@ -30,6 +30,7 @@ cloud-game/
     api/             # REST API
     game/            # 游戏逻辑
     db/              # 数据库层
+    plugins/         # Nitro 插件（Socket.IO 初始化）
     utils/           # 服务端工具
   docs/              # 项目文档
   tests/             # 自动化测试（按模块分子目录）
@@ -74,7 +75,7 @@ git subtree pull --prefix=_reference upstream master --squash
 | 类型检查 | vue-tsc | `--noEmit` 模式 |
 | 样式 | SCSS | Vite 预处理器 + 全局主题变量 |
 | 状态管理 | Pinia | 配合 Nuxt 插件 |
-| 实时通信 | WebSocket (原生) | `useSocket.ts` 封装，计划迁移至 Socket.IO |
+| 实时通信 | Socket.IO | `socket.io-client`（前端）+ Socket.IO Server（Nitro plugin，独立端口 3200） |
 | 代码规范 | @nuxt/eslint | Flat config，AI 开发风格统一 |
 | 数据库 | MongoDB | 沿用上游方案 |
 

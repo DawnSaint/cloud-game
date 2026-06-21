@@ -1,9 +1,9 @@
-// WebSocket 服务器地址配置
+// Socket.IO 服务端地址（独立端口）
 export const socketURL = process.env.NODE_ENV === 'production'
-  ? 'wss://avalon-game.com/socket.io/'
-  : 'ws://localhost:3000/socket.io/';
+  ? ''
+  : 'http://localhost:3200'
 
 // 存储键名常量
-export const userProfilePath = '__user-profile__';
-export const userSettingsPath = '__user-settings__';
-export const alertStoragePath = '__user-alerts__';
+export const userProfilePath = '__user-profile__'
+export const userSettingsPath = '__user-settings__'
+export const alertStoragePath = '__user-alerts__'

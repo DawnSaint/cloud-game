@@ -11,9 +11,10 @@
 
 - [ ] 安装 MongoDB，配置本地开发环境连接
 - [ ] 服务端数据库层（`server/db/`）：连接管理、基础 Model 定义（参考上游 `_reference/packages/backend/src/db/models/`）
-- [ ] 迁移实时通信至 Socket.IO — 替换 `useSocket.ts` 原生 WebSocket 封装，引入 `socket.io-client`（前端）+ Socket.IO（Nitro 服务端）
+- [x] 迁移实时通信至 Socket.IO — 替换 `useSocket.ts` 原生 WebSocket 封装，引入 `socket.io-client`（前端）+ Socket.IO（Nitro 服务端）
 - [ ] 基础房间 REST API（`server/api/rooms/`）：创建、列表、详情
 - [ ] 房间 Socket 事件协议：创建/加入/离开房间，房间状态广播（参考 `_reference/packages/types/api/sockets.ts`）
+- [ ] 移植共享类型定义 — 将上游 `@avalon/types` 中的领域模型（Socket 协议、角色、游戏状态、房间、用户）移植为纯 TypeScript interface，与 Mongoose Schema 解耦（参考 `_reference/packages/types/`）
 - [ ] 前端房间大厅 UI：房间列表、创建房间表单、加入/离开房间
 
 ---

@@ -15,7 +15,7 @@
 | 类型 | TypeScript | 严格模式 |
 | 样式 | SCSS | Vite 预处理器 + 全局主题变量注入 |
 | 状态管理 | Pinia | 配合 Nuxt 插件 |
-| 实时通信 | WebSocket (原生) | `useSocket.ts` 封装，计划迁移至 Socket.IO |
+| 实时通信 | Socket.IO | `socket.io-client`（前端）+ Socket.IO Server（Nitro plugin），独立端口 3200 |
 | 测试 | Vitest | 单元测试 + 集成测试 |
 | 类型检查 | vue-tsc | `--noEmit` 模式 |
 | 代码规范 | @nuxt/eslint | Flat config，AI 开发风格统一 |
@@ -46,8 +46,8 @@ cloud-game/
     api/             # REST API（/api/rooms, /api/user 等）
     game/            # 游戏逻辑（Game engine, Roles, Addons）
     db/              # 数据库层（Models, Queries）
-    socket/          # WebSocket 处理（如适用）
-    utils/           # 服务端工具函数
+    plugins/         # Nitro 插件（Socket.IO 初始化等）
+    utils/           # 服务端工具函数（JWT、Socket 单例等）
 
   docs/              # 项目文档
   nuxt.config.ts     # Nuxt 配置

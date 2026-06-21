@@ -4,6 +4,12 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxt/eslint'],
 
+  nitro: {
+    experimental: {
+      websocket: false,
+    },
+  },
+
   vite: {
     css: {
       preprocessorOptions: {

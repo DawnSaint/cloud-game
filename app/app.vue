@@ -1,5 +1,5 @@
 <template>
-  <NuxtPage />
+  <NuxtPage class="app-page" />
   <TabBar />
   <UIOverlay />
 </template>
@@ -44,5 +44,14 @@ body,
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
     'Helvetica Neue', sans-serif;
+}
+
+.app-page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: calc(100% - 60px); // Adjust for TabBar height
+  overflow: auto;
 }
 </style>
