@@ -10,16 +10,17 @@
 |------|------|------|
 | 框架 | Nuxt 5 (nightly) | SSR，文件路由，auto-import |
 | 服务端 | Nitro 3 | API routes, middleware, WebSocket, h3 |
-| 前端 | Vue 3.5+ (Composition API) | `<script setup>` |
-| 构建 | Vite 8 | Nuxt 内置，开发环境秒级热更新 |
+| 前端 | Vue 3 | Nuxt 内置 |
+| 构建 | Vite 8 | Nuxt 内置 |
 | 类型 | TypeScript | 严格模式 |
 | 样式 | SCSS | Vite 预处理器 + 全局主题变量注入 |
-| 状态管理 | Pinia | 配合 Nuxt 插件 |
+| 状态管理 | Pinia | |
 | 实时通信 | Socket.IO | `socket.io-client`（前端）+ Socket.IO Server（Nitro plugin），独立端口 3200 |
 | 测试 | Vitest | 单元测试 + 集成测试 |
 | 类型检查 | vue-tsc | `--noEmit` 模式 |
 | 代码规范 | @nuxt/eslint | Flat config，AI 开发风格统一 |
-| 数据库 | MongoDB | 沿用上游方案 |
+| 数据库 | MongoDB | 连接串通过 `.env` 管理 |
+| ODM | Mongoose | Schema 校验 + TypeScript 类型推断，替代上游的 Typegoose |
 | 部署 | 待定 | Node.js / Vercel / Docker |
 
 ---
@@ -46,6 +47,7 @@ cloud-game/
     api/             # REST API（/api/rooms, /api/user 等）
     game/            # 游戏逻辑（Game engine, Roles, Addons）
     db/              # 数据库层（Models, Queries）
+      models/        # Mongoose Models（User, Room）
     plugins/         # Nitro 插件（Socket.IO 初始化等）
     utils/           # 服务端工具函数（JWT、Socket 单例等）
 

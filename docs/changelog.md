@@ -4,7 +4,31 @@
 
 ---
 
-## [Unreleased]
+## [0.0.5]
+
+### 新增
+
+- 引入 `mongoose` 作为 ODM，连接 MongoDB Atlas 集群（连接串通过 `.env` 中的 `MONGODB_URI` 管理）
+- 新增 `server/db/index.ts`：连接单例与 `connectMongoDB()` / `getMongoConnection()` 工具
+- 新增 `server/db/models/`：首批 Mongoose Models
+  - `User`：对应 `shared/types/user` 的 `UserProfile`（login/email/id 唯一索引）
+  - `Room`：对应 `shared/types/room` 的 `StartedRoomState`（roomID 唯一索引，options/game/vote 为 Mixed）
+- 新增 `server/plugins/mongodb.ts`：Nitro 启动时触发 MongoDB 连接（fire-and-forget）
+- 新增 `.env.example`：模板化环境变量示例（MONGODB_URI / JWT_SECRET）
+
+### 变更
+
+- `AGENTS.md` 技术栈表新增 Mongoose 行、项目结构补充 `server/db/models/` 子目录
+- `docs/architecture.md` 同步更新技术栈与目录结构
+- `docs/roadmap.md` v0.1.0 勾选：MongoDB 本地开发连接、服务端数据库层基础 Model
+
+### 依赖变更
+
+- 新增依赖：`mongoose`
+
+---
+
+## [0.0.4]
 
 ### 新增
 
@@ -45,6 +69,26 @@
 
 - 修复 Socket.IO 热重载时 EADDRINUSE 端口冲突
 - 修复 Socket connect 事件在 Pinia 初始化前触发导致的 getActivePinia 错误
+
+---
+
+## [0.0.2] - 开发工具链
+
+### 新增
+
+- 新增开发工具链：Vitest 测试框架、vue-tsc 类型检查、@nuxt/eslint 代码规范
+- 新增 npm scripts：`test` / `test:watch` / `typecheck` / `lint` / `lint:fix`
+- 新增测试方案文档（`docs/testing.md`）
+- 新增 `eslint.config.mjs`、`vitest.config.ts`、`tests/setup.ts`
+- 新增工具函数单元测试（`tests/utils/validators.test.ts`）
+
+### 变更
+
+- `AGENTS.md` 新增测试规范、文档同步规范，更新技术栈表
+- 架构文档和路线图文档更新技术栈表格
+- 路线图从"阶段"重构为"版本号"里程碑
+- 主题文件（`theme.scss`）预计算色值变体，替代 Sass `color.adjust()` 避免运行时依赖
+- 组件批量 ESLint 自动修复（自闭合标签、属性顺序）
 
 ---
 

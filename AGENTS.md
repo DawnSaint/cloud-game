@@ -30,7 +30,8 @@ cloud-game/
     api/             # REST API
     game/            # 游戏逻辑
     db/              # 数据库层
-    plugins/         # Nitro 插件（Socket.IO 初始化）
+      models/        # Mongoose Models（User, Room）
+    plugins/         # Nitro 插件（Socket.IO 初始化、MongoDB 连接）
     utils/           # 服务端工具
   shared/            # 前后端共享类型与常量
     types/           # 领域模型（纯 interface/type，无 Mongoose 依赖）
@@ -79,7 +80,8 @@ git subtree pull --prefix=_reference upstream master --squash
 | 状态管理 | Pinia | 配合 Nuxt 插件 |
 | 实时通信 | Socket.IO | `socket.io-client`（前端）+ Socket.IO Server（Nitro plugin，独立端口 3200） |
 | 代码规范 | @nuxt/eslint | Flat config，AI 开发风格统一 |
-| 数据库 | MongoDB | 沿用上游方案 |
+| 数据库 | MongoDB | 通过 `.env` 管理连接 |
+| ODM | Mongoose | Schema 校验 + TypeScript 类型推断，替代上游的 Typegoose |
 
 ## 代码规范
 

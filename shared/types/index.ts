@@ -1,6 +1,3 @@
-export type { Dictionary } from './utils';
-export { evilRolesImportance, goodRolesImportance } from './consts';
-
 export type {
   TRoles,
   TGoodRoles,
