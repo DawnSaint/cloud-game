@@ -32,6 +32,8 @@ cloud-game/
     db/              # 数据库层
     plugins/         # Nitro 插件（Socket.IO 初始化）
     utils/           # 服务端工具
+  shared/            # 前后端共享类型与常量
+    types/           # 领域模型（纯 interface/type，无 Mongoose 依赖）
   docs/              # 项目文档
   tests/             # 自动化测试（按模块分子目录）
   nuxt.config.ts

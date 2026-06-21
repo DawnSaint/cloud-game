@@ -59,7 +59,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { socket } from '~/composables/useSocket';
-import type { GameOptions, GameOptionsRoles, GameOptionsAddons } from '~/types';
+import type { GameOptions, GameOptionsRoles } from '~/types';
 import { showToast } from '~/composables/useUI';
 
 interface Props {
@@ -76,8 +76,6 @@ const emit = defineEmits<{
 // 本地选项副本
 const localOptions = ref<GameOptions>({
   roles: { ...props.options.roles },
-  addons: { ...props.options.addons },
-  features: { ...props.options.features },
 });
 
 // 监听 props 变化，更新本地副本
@@ -86,8 +84,6 @@ watch(
   (newOptions) => {
     localOptions.value = {
       roles: { ...newOptions.roles },
-      addons: { ...newOptions.addons },
-      features: { ...newOptions.features },
     };
   },
   { deep: true },
@@ -142,7 +138,7 @@ const addons = [
 
 // 切换角色
 const toggleRole = (roleKey: keyof GameOptionsRoles) => {
-  localOptions.value.roles[roleKey] = !localOptions.value.roles[roleKey];
+  localOptions.value.roles[roleKey] = localOptions.value.roles[roleKey] ? undefined : 1;
 };
 
 // 关闭

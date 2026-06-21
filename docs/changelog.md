@@ -4,6 +4,28 @@
 
 ---
 
+## [Unreleased]
+
+### 新增
+
+- 创建 `shared/types/` 共享类型目录，从上游 `@avalon/types` 移植核心领域模型为纯 TypeScript interface/type
+  - 游戏类型：角色、玩家、任务、投票、状态、选项、设置
+  - 房间类型：房间状态联合类型、房间列表信息
+  - 用户类型：资料、认证令牌
+  - 统计类型：胜率统计
+  - Socket 事件协议：精简版 ClientToServer/ServerToClient 事件定义
+  - 历史类型：投票、任务、刺杀历史记录
+  - 运行时常量：角色重要性排序
+
+### 变更
+
+- `app/types/index.ts` 改为从 `#shared/types` re-export，保留应用级类型（语言、用户设置、警告）
+- `GameOptionsRoles` 角色配置从 `boolean` 改为 `number`（角色数量），与上游一致
+- 移除 `GameOptionsAddons`、`GameOptionsFeatures`（扩展玩法暂不实现）
+- `vitest.config.ts` 新增 `#shared` 路径别名
+
+---
+
 ## [0.0.3] - 后端框架搭建
 
 ### 新增

@@ -24,17 +24,10 @@
               <span v-if="game.options.roles.percival" class="option-badge">派西维尔 </span>
               <span v-if="game.options.roles.morgana" class="option-badge">莫甘娜 </span>
               <span v-if="game.options.roles.mordred" class="option-badge">莫德雷德 </span>
-              <span v-if="game.options.addons.lady_of_lake" class="option-badge">湖中女神 </span>
             </div>
           </div>
           <div class="game-right">
             <div class="game-right-content">
-              <div
-                v-if="game.state === 'created' && game.options.features?.lookingForPlayers"
-                class="status-chip looking-for-players"
-              >
-                寻找玩家
-              </div>
               <div class="players-amount">
                 {{ game.state === 'created' ? `${game.players}/10` : `${game.players} 玩家` }}
               </div>
@@ -52,7 +45,7 @@ import { useRouter } from 'vue-router';
 import LobbyLogo from '~/components/LobbyLogo.vue';
 import { useMainStore } from '~/stores/main';
 import { socket } from '~/composables/useSocket';
-import type { TRoomsList, GameOptionsRoles, GameOptionsAddons } from '~/types';
+import type { TRoomsList, GameOptions } from '~/types';
 import { showToast, showModal } from '~/composables/useUI';
 
 const store = useMainStore();
@@ -126,8 +119,8 @@ const handleRoomClick = (uuid: string) => {
 };
 
 // 检查是否有配置选项
-const hasOptions = (options: { roles: GameOptionsRoles; addons: GameOptionsAddons }) => {
-  return [...Object.values(options.roles), ...Object.values(options.addons)].some((el) => Boolean(el));
+const hasOptions = (options: GameOptions) => {
+  return Object.values(options.roles).some((el) => Boolean(el));
 };
 
 // 房间列表更新监听

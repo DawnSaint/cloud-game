@@ -49,6 +49,9 @@ cloud-game/
     plugins/         # Nitro 插件（Socket.IO 初始化等）
     utils/           # 服务端工具函数（JWT、Socket 单例等）
 
+  shared/            # 前后端共享类型与常量
+    types/           # 领域模型（纯 interface/type，从上游 @avalon/types 移植，无 Mongoose 依赖）
+
   docs/              # 项目文档
   nuxt.config.ts     # Nuxt 配置
   package.json
@@ -88,7 +91,7 @@ cloud-game/
 | 上游模块 | 本项目对应 | 说明 |
 |---|---|---|
 | `packages/backend` | `server/game/` + `server/db/` | 游戏逻辑和数据库层重写 |
-| `packages/types` | 项目内 `types/` 或内联 | 类型定义，按需从上游参考移植 |
+| `packages/types` | `shared/types/` | 已从上游移植为纯 interface/type，与 Mongoose Schema 解耦 |
 | `packages/ui` | `app/` | 前端完全重写 |
 
 上游是 Express + Socket.IO + MongoDB + Typegoose 的架构，本项目基于 Nuxt/Nitro 重新设计，不保证 API 兼容。
