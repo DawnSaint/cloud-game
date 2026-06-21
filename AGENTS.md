@@ -199,7 +199,7 @@ npm version <level> -f -m <commit message>
 ```
 
 - `<level>` 为 `patch` / `minor` / `major`，由用户指定或根据改动范围判断
-- `<commit message>` 即发版提交的 message，按上方 Commit Message 格式规约写，type 写 `release`
+- `<commit message>` 即发版提交的 message，按上方 Commit Message 格式规约写
 - 完成后执行 `git push --follow-tags` 推送 commit 和 tag
 
 

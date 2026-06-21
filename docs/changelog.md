@@ -4,6 +4,19 @@
 
 ---
 
+## [0.1.2]
+
+### 新增
+
+- 认证路由守卫 `app/middleware/auth.ts`：未登录用户访问受保护页面（房间、历史战绩、成就）时自动跳转到登录页，登录成功后回跳原路径
+- Pinia store 新增 `token` getter：便捷获取当前用户 JWT token
+- 受保护页面（`room.vue`、`history.vue`、`achievements.vue`）通过 `definePageMeta({ middleware: ['auth'] })` 接入路由守卫
+- `profile.vue` 登录成功后支持 `redirect` 查询参数回跳
+- 认证状态单元测试 `tests/stores/auth.test.ts`：覆盖 `isLoggedIn`、`token` getter、`logout` 清除、localStorage 持久化
+- 路由守卫单元测试 `tests/middleware/auth.test.ts`：覆盖未登录跳转、已登录放行、redirect 参数传递
+
+---
+
 ## [0.1.1]
 
 ### 新增

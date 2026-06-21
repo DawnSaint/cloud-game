@@ -34,6 +34,8 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({ middleware: ['auth'] });
+
 import { ref, computed, onMounted } from 'vue';
 import { useMainStore } from '~/stores/main';
 import { socket } from '~/composables/useSocket';

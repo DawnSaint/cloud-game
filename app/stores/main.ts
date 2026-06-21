@@ -86,6 +86,7 @@ export const useMainStore = defineStore('main', {
 
   getters: {
     isLoggedIn: (state) => !!state.profile,
+    token: (state) => state.profile?.token,
     userName: (state) => state.profile?.name || '',
     userAvatar: (state) => state.profile?.avatar || '',
     getAchievementName: (state) => {

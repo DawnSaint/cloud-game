@@ -122,6 +122,8 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({ middleware: ['auth'] });
+
 import { ref, computed, onMounted, onUnmounted, onBeforeUnmount } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useMainStore } from '~/stores/main';

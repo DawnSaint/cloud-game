@@ -100,7 +100,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, reactive } from 'vue';
+import { computed, ref, onMounted, reactive, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useMainStore } from '~/stores/main';
 import { socket } from '~/composables/useSocket';
 import HistoryView from '~/components/profile/HistoryView.vue';
@@ -110,6 +111,17 @@ import { webLogin, webRegister } from '~/utils/login';
 import { showToast } from '~/composables/useUI';
 
 const store = useMainStore();
+const route = useRoute();
+const router = useRouter();
+
+watch(() => store.isLoggedIn, (loggedIn) => {
+  if (loggedIn) {
+    const redirect = route.query.redirect as string;
+    if (redirect) {
+      router.replace(redirect);
+    }
+  }
+});
 
 // 视图切换状态
 type ViewType = 'profile' | 'history' | 'achievements';
