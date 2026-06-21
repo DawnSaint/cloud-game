@@ -10,10 +10,10 @@
 
 - [x] 新建 `shared/types/common/` — 通用房间类型（TRoomState 增加 gameType）、用户类型迁移
 - [x] 新建 `shared/types/games/avalon/` — 现有 `game/` 类型整体迁入，GameOptions → AvalonGameConfig
-- [ ] Socket 事件类型分层 — 通用事件接口 + 游戏事件接口，ClientToServerEvents 拆分
+- [x] Socket 事件类型分层 — 通用事件接口 + 游戏事件接口，ClientToServerEvents 拆分
 - [x] Room Model 增加 `gameType` 字段 — 迁移 `options` → `config`，保持向后兼容
 - [x] TRoomInfo 更新 — 房间列表项增加 gameType，options 改为 gameConfig
-- [ ] 清理旧类型路径 — `shared/types/room/`、`shared/types/game/` 标记废弃，通过 re-export 过渡
+- [x] 清理旧类型路径 — `shared/types/room/`、`shared/types/game/` 物理目录已移除，根 barrel 作为唯一公共入口
 
 ---
 

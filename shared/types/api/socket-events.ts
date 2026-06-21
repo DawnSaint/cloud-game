@@ -1,17 +1,8 @@
 import type { Server as SuperServer, Socket as SuperServerSocket } from 'socket.io';
 import type { Socket as SuperSocket } from 'socket.io-client';
 
-import type { TRoomState } from '../common/room';
-import type { TRoomsList } from '../common/room-list';
-import type { VisualGameState } from '../games/avalon/state';
-import type { GameOptions } from '../games/avalon/options';
-import type { TVoteOption } from '../games/avalon/vote';
-import type { TMissionResult } from '../games/avalon/mission';
-import type { TRoles } from '../games/avalon/roles';
-import type { TAssassinateType } from '../games/avalon/addons';
-import type { IRoomUnavailableError } from './errors';
-import type { TTotalWinrateStats } from '../stats';
-import type { PublicUserProfile } from '../user';
+import type { CommonClientToServerEvents, CommonServerToClientEvents } from './common-events';
+import type { AvalonClientToServerEvents, AvalonServerToClientEvents } from './avalon-events';
 
 export type {
   ISocketError,
@@ -26,48 +17,22 @@ export type {
 
 export type { ArgumentOfCallback } from './helpers';
 
-export interface ServerToClientEvents {
-  roomsListUpdated: (list: TRoomsList) => void;
-  onlineCounterUpdated: (counter: number) => void;
-  roomOnlineUpdated: (counter: number) => void;
-  roomUpdated: (state: TRoomState) => void;
-  gameUpdated: (state: VisualGameState) => void;
-  restartGame: (uuid: string) => void;
-  destroyRoom: (uuid: string) => void;
-  serverError: (error: string) => void;
-  renewJWT: () => void;
-}
+export type {
+  CommonServerToClientEvents,
+  CommonClientToServerEvents,
+  CommonServer,
+  CommonSocket,
+  CommonServerSocket,
+} from './common-events';
 
-export interface ClientToServerEvents {
-  getTotalStats: (callback: (stats: TTotalWinrateStats) => void) => void;
-  getPlayerGames: (uuid: string, callback: (games: VisualGameState[]) => void) => void;
-  getRoomsList: (callback: (list: TRoomsList) => void) => void;
-  getOnlineCounter: (id: string, callback: (counter: number) => void) => void;
-  getUserProfile: (id: string, callback: (user: PublicUserProfile) => void) => void;
+export type {
+  AvalonServerToClientEvents,
+  AvalonClientToServerEvents,
+} from './avalon-events';
 
-  createRoom: (callback: (uuid: string) => void) => void;
-  updateOptions: (uuid: string, options: GameOptions) => void;
-  joinRoom: (uuid: string, callback: (state: TRoomState | IRoomUnavailableError) => void) => void;
-  lockRoom: (uuid: string) => void;
-  kickPlayer: (uuid: string, userID: string) => void;
-  leaveRoom: (uuid: string) => void;
+export interface ServerToClientEvents extends CommonServerToClientEvents, AvalonServerToClientEvents {}
 
-  endGame: (uuid: string) => void;
-  endAndRestartGame: (uuid: string) => void;
-  shuffle: (uuid: string) => void;
-  voteInRoom: (uuid: string, result: boolean) => void;
-
-  joinGame: (uuid: string) => void;
-  startGame: (uuid: string) => void;
-  leaveGame: (uuid: string) => void;
-  restartGame: (uuid: string) => void;
-
-  selectPlayer: (uuid: string, userID: string) => void;
-  sentSelectedPlayers: (uuid: string) => void;
-  voteForMission: (uuid: string, option: TVoteOption) => void;
-  actionOnMission: (uuid: string, result: TMissionResult) => void;
-  assassinate: (uuid: string, type: TAssassinateType, role?: TRoles) => void;
-}
+export interface ClientToServerEvents extends CommonClientToServerEvents, AvalonClientToServerEvents {}
 
 export type Server = SuperServer<ClientToServerEvents, ServerToClientEvents>;
 export type Socket = SuperSocket<ServerToClientEvents, ClientToServerEvents>;

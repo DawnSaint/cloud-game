@@ -4,6 +4,22 @@
 
 ---
 
+## [0.1.0]
+
+### 新增
+
+- Socket 事件协议分层（`shared/types/api/`）
+  - `common-events.ts`：跨游戏通用事件接口（`CommonServerToClientEvents` / `CommonClientToServerEvents`），覆盖房间管理、在线计数、统计查询、用户资料等通用通道
+  - `avalon-events.ts`：Avalon 游戏专属事件接口（`AvalonServerToClientEvents` / `AvalonClientToServerEvents`），覆盖组队、投票、任务、刺杀等玩法通道
+  - 最终 `ClientToServerEvents` / `ServerToClientEvents` 通过 interface 合并组合而成；同步导出 `CommonServer` / `CommonSocket` / `CommonServerSocket` 基类型，方便接入第二款游戏时直接复用通用层
+
+### 变更
+
+- `shared/types/api/socket-events.ts` 职责收敛为"组合入口 + 别名导出"，事件定义分散至对应分层文件
+- `shared/types/room/`、`shared/types/game/` 物理目录已移除（上一版本已迁入 `common/` 与 `games/avalon/`），`shared/types/index.ts` 根 barrel 作为唯一公共入口，旧路径彻底废弃
+
+---
+
 ## [0.0.6]
 
 ### 新增
