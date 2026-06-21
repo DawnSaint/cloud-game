@@ -4,6 +4,25 @@
 
 ---
 
+## [0.1.1]
+
+### 新增
+
+- 用户数据服务层 `server/db/user.ts`：注册（bcrypt 12 轮哈希）、登录（email/login 双通道）、凭据更新（需验证当前密码）、公开/私有资料查询
+- Socket.IO 认证中间件：连接时从 `socket.handshake.auth.token` 提取并验证 JWT，绑定 userId 到 socket 个人房间，无效 token 触发 `renewJWT` 事件
+- Socket 认证事件处理器：`registerUser`、`login`（公开）、`getMyProfile`、`updateUserName`、`updateUserEmail`、`updateUserLogin`、`updateUserPassword`（需认证）
+- `CommonClientToServerEvents` 增加 7 个 auth 事件类型定义（注册、登录、资料查询、凭据更新）
+- Pinia store `logout` action：清除本地 profile 并断开 socket 重连
+- Profile 页退出登录按钮（红色高亮样式）
+- 用户服务单元测试 `tests/db/user.test.ts`：覆盖注册成功/重复、登录成功/失败（email 和 login）、凭据更新、公开资料查询
+
+### 变更
+
+- `server/plugins/socket.io.ts`：从空壳升级为完整连接处理器（JWT 验证 + 分层事件注册）
+- `docs/roadmap.md`：新增 v0.1.1 里程碑，v0.2.0 已实现项标记为完成
+
+---
+
 ## [0.1.0]
 
 ### 新增

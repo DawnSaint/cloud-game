@@ -5,7 +5,7 @@ const userSchema = new Schema<UserProfile>(
   {
     id: { type: String, required: true, unique: true, index: true },
     login: { type: String, required: true, unique: true, index: true },
-    email: { type: String, required: true, unique: true, index: true },
+    email: { type: String, required: false, unique: true, sparse: true, index: true, set: (v: string) => v?.trim() || undefined },
     name: { type: String, required: true },
     avatar: { type: String, required: true, default: '' },
     password: { type: String, required: true },

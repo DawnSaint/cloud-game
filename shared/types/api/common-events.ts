@@ -3,9 +3,16 @@ import type { Socket as SuperSocket } from 'socket.io-client';
 
 import type { TRoomState } from '../common/room';
 import type { TRoomsList } from '../common/room-list';
-import type { IRoomUnavailableError } from './errors';
+import type {
+  IRoomUnavailableError,
+  ILoginError,
+  IRegisterError,
+  IUpdateEmailError,
+  IUpdatePasswordError,
+  IUpdateLoginError,
+} from './errors';
 import type { TTotalWinrateStats } from '../stats';
-import type { PublicUserProfile } from '../user';
+import type { PublicUserProfile, UserForUI, UserWithToken } from '../user';
 
 export type {
   ISocketError,
@@ -36,6 +43,14 @@ export interface CommonClientToServerEvents {
   getRoomsList: (callback: (list: TRoomsList) => void) => void;
   getOnlineCounter: (id: string, callback: (counter: number) => void) => void;
   getUserProfile: (id: string, callback: (user: PublicUserProfile) => void) => void;
+
+  registerUser: (user: { id: string; login: string; password: string }, callback: (result: UserWithToken | IRegisterError) => void) => void;
+  login: (loginOrEmail: string, password: string, callback: (result: UserWithToken | ILoginError) => void) => void;
+  getMyProfile: (callback: (profile: UserForUI) => void) => void;
+  updateUserName: (name: string) => void;
+  updateUserEmail: (password: string, email: string, callback: (result: true | IUpdateEmailError) => void) => void;
+  updateUserLogin: (password: string, login: string, callback: (result: true | IUpdateLoginError) => void) => void;
+  updateUserPassword: (password: string, newPassword: string, callback: (result: true | IUpdatePasswordError) => void) => void;
 
   createRoom: (callback: (uuid: string) => void) => void;
   joinRoom: (uuid: string, callback: (state: TRoomState | IRoomUnavailableError) => void) => void;

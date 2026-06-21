@@ -28,10 +28,8 @@ export async function webLogin(loginOrEmail: string, password: string): Promise<
  * Web 端注册
  */
 export async function webRegister(params: {
-  password: string;
-  name: string;
-  email: string;
   login: string;
+  password: string;
 }): Promise<LoginResult> {
   try {
     const store = useMainStore();

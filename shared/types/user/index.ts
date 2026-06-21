@@ -5,7 +5,7 @@ export interface PublicUserProfile {
 }
 
 export interface UserForUI extends PublicUserProfile {
-  email: string;
+  email?: string;
   login: string;
 }
 

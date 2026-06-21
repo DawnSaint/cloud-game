@@ -40,6 +40,10 @@
               <span class="menu-label">查看成就</span>
               <span class="menu-arrow">&rsaquo;</span>
             </div>
+            <div class="menu-item menu-item--danger" @click="handleLogout">
+              <span class="menu-label">退出登录</span>
+              <span class="menu-arrow">&rsaquo;</span>
+            </div>
           </div>
         </div>
       </div>
@@ -62,7 +66,7 @@
         </div>
 
         <div v-if="formMode === 'login'" class="form-body">
-          <input v-model="loginForm.login" class="form-input" placeholder="用户名或邮箱" :disabled="loginLoading" >
+          <input v-model="loginForm.login" class="form-input" placeholder="用户名" :disabled="loginLoading" >
           <input
             v-model="loginForm.password"
             class="form-input"
@@ -78,20 +82,13 @@
 
         <div v-else class="form-body">
           <input v-model="registerForm.login" class="form-input" placeholder="用户名" :disabled="loginLoading" >
-          <input v-model="registerForm.name" class="form-input" placeholder="昵称" :disabled="loginLoading" >
-          <input
-            v-model="registerForm.email"
-            class="form-input"
-            type="email"
-            placeholder="邮箱"
-            :disabled="loginLoading"
-          >
           <input
             v-model="registerForm.password"
             class="form-input"
             type="password"
             placeholder="密码"
             :disabled="loginLoading"
+            @keyup.enter="handleRegister"
           >
           <button class="form-btn" :disabled="loginLoading" @click="handleRegister">
             {{ loginLoading ? '注册中...' : '注册' }}
@@ -129,8 +126,6 @@ const loginForm = reactive({
 
 const registerForm = reactive({
   login: '',
-  name: '',
-  email: '',
   password: '',
 });
 
@@ -244,8 +239,8 @@ const handleLogin = async () => {
 };
 
 const handleRegister = async () => {
-  const { login, name, email, password } = registerForm;
-  if (!login || !name || !email || !password) {
+  const { login, password } = registerForm;
+  if (!login || !password) {
     showToast({ title: '请填写完整的注册信息', icon: 'none' });
     return;
   }
@@ -253,13 +248,11 @@ const handleRegister = async () => {
   loginLoading.value = true;
 
   try {
-    const result = await webRegister({ login, name, email, password });
+    const result = await webRegister({ login, password });
 
     if (result.success) {
       showToast({ title: '注册成功', icon: 'success', duration: 2000 });
       registerForm.login = '';
-      registerForm.name = '';
-      registerForm.email = '';
       registerForm.password = '';
       formMode.value = 'login';
       await initStats();
@@ -284,6 +277,10 @@ const handleViewHistory = () => {
 
 const handleBack = () => {
   currentView.value = 'profile';
+};
+
+const handleLogout = () => {
+  store.logout();
 };
 </script>
 
@@ -400,6 +397,10 @@ const handleBack = () => {
 
   &:active {
     background-color: rgba(0, 0, 0, 0.02);
+  }
+
+  &--danger .menu-label {
+    color: $error;
   }
 }
 

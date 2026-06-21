@@ -145,6 +145,12 @@ export const useMainStore = defineStore('main', {
       }
     },
 
+    // 退出登录
+    logout() {
+      this.clearUserProfile();
+      socket.updateAuthToken();
+    },
+
     // 更新连接状态
     updateConnectState(value: boolean) {
       this.connect = value;
@@ -172,8 +178,9 @@ export const useMainStore = defineStore('main', {
     },
 
     // 注册用户
-    async registerUser(params: { password: string; name: string; email: string; login: string }) {
-      const user = await socket.emitWithAck<UserWithToken | { error: string }>('registerUser', params);
+    async registerUser(params: { login: string; password: string }) {
+      const id = crypto.randomUUID();
+      const user = await socket.emitWithAck<UserWithToken | { error: string }>('registerUser', { id, ...params });
 
       if (user && !('error' in user)) {
         this.updateUserProfile(user);

@@ -17,14 +17,27 @@
 
 ---
 
+## v0.1.1 — 服务端认证核心
+
+补齐服务端认证链路，让客户端注册/登录/会话管理跑通。
+
+- [x] 用户数据服务层 — `server/db/user.ts`（bcrypt 哈希、注册、登录、凭据更新）
+- [x] Socket.IO 认证中间件 — 连接时验证 JWT，绑定 userId 到 socket，无效 token 触发 renewJWT
+- [x] Socket 认证事件处理器 — registerUser、login、getMyProfile、updateUser* 全套服务端实现
+- [x] Socket 事件类型补全 — `CommonClientToServerEvents` 增加 auth 事件类型定义
+- [x] 前端登出功能 — Pinia store logout action + profile.vue 退出登录按钮
+- [x] 用户服务单元测试 — `tests/db/user.test.ts` 覆盖注册、登录、凭据更新核心路径
+
+---
+
 ## v0.2.0 — 用户认证
 
 实现注册/登录/会话管理，为房间系统提供用户身份基础。
 
-- [ ] 注册 API — `POST /api/auth/register`（昵称、邮箱、密码）
-- [ ] 登录 API — `POST /api/auth/login`（邮箱 + 密码 → JWT）
-- [ ] 用户资料 API — `GET /api/user/profile`，`PUT /api/user/profile`
-- [ ] Socket.IO 认证中间件 — 连接时验证 JWT，绑定 userId 到 socket
+- [x] 注册 API — `POST /api/auth/register`（昵称、邮箱、密码）
+- [x] 登录 API — `POST /api/auth/login`（邮箱 + 密码 → JWT）
+- [x] 用户资料 API — `GET /api/user/profile`，`PUT /api/user/profile`
+- [x] Socket.IO 认证中间件 — 连接时验证 JWT，绑定 userId 到 socket
 - [ ] 前端登录/注册页面 — 完善 `profile.vue` 表单交互，移动端适配
 - [ ] 认证状态管理 — Pinia store 持久化 token，路由守卫（未登录跳转）
 
