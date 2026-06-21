@@ -2,12 +2,13 @@ import { model, Schema } from 'mongoose'
 
 export interface TRoomDoc {
   roomID: string
+  gameType: string
   stage: 'created' | 'locked' | 'started'
   leaderID: string
   createAt: string
   startAt?: string
   players: Array<{ id: string, isLeader: boolean }>
-  options: Record<string, unknown>
+  config: Record<string, unknown>
   game?: Record<string, unknown>
   vote?: Record<string, unknown>
 }
@@ -23,6 +24,7 @@ const roomPlayerSchema = new Schema(
 const roomSchema = new Schema<TRoomDoc>(
   {
     roomID: { type: String, required: true, unique: true, index: true },
+    gameType: { type: String, required: true, default: 'avalon' },
     stage: {
       type: String,
       required: true,
@@ -33,7 +35,7 @@ const roomSchema = new Schema<TRoomDoc>(
     createAt: { type: String, required: true },
     startAt: { type: String },
     players: { type: [roomPlayerSchema], default: [] },
-    options: { type: Schema.Types.Mixed, required: true },
+    config: { type: Schema.Types.Mixed, required: true },
     game: { type: Schema.Types.Mixed },
     vote: { type: Schema.Types.Mixed },
   },

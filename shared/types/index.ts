@@ -1,3 +1,4 @@
+// Game types — canonical source: shared/types/games/avalon/
 export type {
   TRoles,
   TGoodRoles,
@@ -11,15 +12,15 @@ export type {
   TRequiredRoles,
   TLoyalty,
   TVisibleRole,
-} from './game/roles';
+} from './games/avalon/roles';
 
-export type { Player, PlayerFeatures } from './game/player';
-export type { TMissionResult, MissionSettings, MissionWithResult } from './game/mission';
-export type { TVoteOption, TeamMember, PreVoteData } from './game/vote';
-export type { GameOptionsRoles, GameOptions } from './game/options';
-export type { PlayersSettings, GameRoles, GameSettings, GameSettingsWithRoles } from './game/settings';
-export type { VisualGameState, GameResults, TGameStage, TGameEndReasons } from './game/state';
-export type { TAssassinateType, TAssassinateResult, AssassinAddonData, AssassinateProgressData } from './game/addons';
+export type { Player, PlayerFeatures } from './games/avalon/player';
+export type { TMissionResult, MissionSettings, MissionWithResult } from './games/avalon/mission';
+export type { TVoteOption, TeamMember, PreVoteData } from './games/avalon/vote';
+export type { GameOptionsRoles, AvalonGameConfig, GameOptions } from './games/avalon/options';
+export type { PlayersSettings, GameRoles, GameSettings, GameSettingsWithRoles } from './games/avalon/settings';
+export type { AvalonGameState, VisualGameState, GameResults, TGameStage, TGameEndReasons } from './games/avalon/state';
+export type { TAssassinateType, TAssassinateResult, AssassinAddonData, AssassinateProgressData } from './games/avalon/addons';
 
 export type {
   THistoryResults,
@@ -42,7 +43,10 @@ export type {
   THistoryMission,
   SwitchResult,
   HistoryAssassinate,
-} from './game/history';
+} from './games/avalon/history';
+
+// Common types — canonical source: shared/types/common/
+export type { TGameType, TGameConfig } from './common/game';
 
 export type {
   TRoomState,
@@ -55,14 +59,18 @@ export type {
   StartedRoomState,
   RoomPlayer,
   VoteOfPlayer,
-} from './room';
-export type { TRoomsList, TRoomInfo } from './room/list';
+} from './common/room';
 
+export type { TRoomsList, TRoomInfo } from './common/room-list';
+
+// User types
 export type { PublicUserProfile, UserForUI, UserWithToken, UserProfile } from './user';
 export type { IAvatarInfo } from './user/avatars';
 
+// Stats types
 export type { TTotalWinrateStats, TWinrateStats, TRoleStats } from './stats';
 
+// API types
 export type {
   ServerToClientEvents,
   ClientToServerEvents,

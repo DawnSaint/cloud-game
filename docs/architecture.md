@@ -37,7 +37,10 @@ cloud-game/
 
   app/               # Nuxt 前端
     pages/           # 文件路由（首页、游戏大厅、房间、Wiki 等）
-    components/      # Vue 组件（按功能域分子目录）
+    components/      # Vue 组件
+      common/        # 通用组件（玩家列表、房主控制等）
+      games/         # 游戏专属组件
+        avalon/      # Avalon 游戏面板、操作界面等
     composables/     # 组合式函数（useGame, useSocket 等）
     layouts/         # 布局（default, game 等）
     middleware/      # 路由中间件（认证等）
@@ -45,14 +48,19 @@ cloud-game/
 
   server/            # Nitro 服务端
     api/             # REST API（/api/rooms, /api/user 等）
-    game/            # 游戏逻辑（Game engine, Roles, Addons）
+    game/            # 游戏逻辑
+      registry.ts    # 游戏注册表（gameType → GameEngine）
+      avalon/        # Avalon 引擎（engine, roles, missions, addons）
     db/              # 数据库层（Models, Queries）
       models/        # Mongoose Models（User, Room）
     plugins/         # Nitro 插件（Socket.IO 初始化等）
     utils/           # 服务端工具函数（JWT、Socket 单例等）
 
   shared/            # 前后端共享类型与常量
-    types/           # 领域模型（纯 interface/type，从上游 @avalon/types 移植，无 Mongoose 依赖）
+    types/
+      common/        # 通用类型（room, user, api 等）
+      games/         # 游戏专属类型
+        avalon/      # Avalon（角色、状态、配置等）
 
   docs/              # 项目文档
   nuxt.config.ts     # Nuxt 配置
@@ -85,6 +93,74 @@ cloud-game/
 - Nitro server 运行在 Node.js 环境，可直接运行游戏引擎
 - 无需维护独立的 backend 进程，简化部署
 - 前后端共享 TypeScript 类型，无需跨包同步
+
+### 4. 多游戏架构：通用层 + 游戏层分离
+
+**原因**：
+- 项目定位为云游戏平台，未来需接入多款游戏，不能只服务 Avalon
+- 通用层（认证、房间、大厅）与游戏层（引擎、类型、UI）解耦，接入新游戏时通用层零改动
+- 移动端优先：通用组件做好即可，游戏组件按需懒加载，首屏不加载所有游戏 UI
+
+#### 架构分层
+
+```
+┌─────────────────────────────────────────┐
+│              Common Layer               │
+│  用户认证、房间 CRUD、大厅、玩家管理     │
+├─────────────────────────────────────────┤
+│           Game Registry                 │
+│  gameType → GameEngine 映射 & 路由分发  │
+├────────────┬────────────────────────────┤
+│  Avalon    │  Future Game B  │  ...     │
+│  Engine    │  Engine         │          │
+│  Types     │  Types          │          │
+│  UI        │  UI             │          │
+└────────────┴────────────────────────────┘
+```
+
+#### 游戏注册表（Game Registry）
+
+服务端 `server/game/registry.ts` 维护 gameType → GameEngine 映射。`TGameEngine` 接口：
+
+- `gameType: string` — 游戏标识
+- `minPlayers / maxPlayers` — 人数范围
+- `validateConfig(config): boolean` — 校验游戏配置
+- `createGame(roomId, players, config): GameState` — 初始化游戏
+- `handleEvent(state, event, payload): GameState` — 游戏事件统一入口
+- `getVisualState(state, playerId): VisualGameState` — 按玩家视角裁剪状态
+
+接入新游戏只需实现 `TGameEngine` 接口并注册到 registry。
+
+#### 类型系统分层
+
+- **通用层**（`shared/types/common/`）：`TGameType` 枚举、`TRoomState`（含 gameType）、`TGameConfig` 联合类型
+- **游戏层**（`shared/types/games/<gameType>/`）：游戏专属类型，如 `shared/types/games/avalon/` 承载角色、任务、状态等
+
+#### Socket 事件分层
+
+- **通用事件**：createRoom(gameType)、joinRoom、leaveRoom、kickPlayer、lockRoom 等房间管理事件，所有游戏共享
+- **游戏事件**：startGame、gameAction(uuid, action, payload) — 服务端根据房间的 gameType 路由到对应引擎的 handleEvent
+
+#### 前端组件分层
+
+- **通用组件**（`app/components/common/`）：玩家列表、房主控制等，所有游戏共用
+- **游戏组件**（`app/components/games/<gameType>/`）：游戏面板、操作界面等，按 gameType 动态加载
+
+房间页面通过 `<component :is="gameComponent" />` 根据当前房间的 gameType 渲染对应游戏 UI。
+
+#### Room Model
+
+```typescript
+interface TRoomDoc {
+  roomID: string
+  gameType: string               // 'avalon' | ...
+  stage: 'created' | 'locked' | 'started'
+  leaderID: string
+  players: RoomPlayer[]
+  config: Record<string, unknown> // 按 gameType 走不同 schema
+  game?: Record<string, unknown>  // 游戏运行时状态
+}
+```
 
 ---
 

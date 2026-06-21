@@ -4,6 +4,29 @@
 
 ---
 
+## [0.0.6]
+
+### 新增
+
+- 新建 `shared/types/games/avalon/` — Avalon 游戏类型的规范目录（roles、player、mission、vote、options、settings、state、addons、history）
+- 新建 `shared/types/common/` — 多游戏通用类型层
+  - `game.ts`：`TGameType` 枚举、`TGameConfig` 联合类型（按游戏类型区分配置 schema）
+  - `room.ts`：`TRoomState` 增加 `gameType` 字段，`options` 改为 `config: TGameConfig`
+  - `room-list.ts`：`TRoomInfo` 增加 `gameType`，`options` 改为 `config`
+- `shared/types/games/avalon/options.ts` 新增 `AvalonGameConfig` 类型（`GameOptions` 作为兼容别名保留）
+- `shared/types/games/avalon/state.ts` 新增 `AvalonGameState` 类型（`VisualGameState` 作为兼容别名保留）
+
+### 变更
+
+- 游戏类型从 `shared/types/game/` 迁移至 `shared/types/games/avalon/`，旧目录已移除
+- 房间类型从 `shared/types/room/` 迁移至 `shared/types/common/room.ts`，旧目录已移除
+- `server/db/models/Room.ts`：新增 `gameType` 字段（默认 `'avalon'`），`options` 重命名为 `config`
+- `shared/types/index.ts`：导出路径更新至 `games/avalon/` 和 `common/`，新增 `TGameType`、`TGameConfig`、`AvalonGameConfig`、`AvalonGameState` 导出
+- 架构设计：确定多游戏平台架构方案（通用层 + Game Registry + 游戏层分离），详见 `docs/architecture.md`
+- 路线图重构：从单游戏线性规划重构为多游戏迭代计划（v0.1.0 ~ v0.7.0），按小版本粒度划分
+
+---
+
 ## [0.0.5]
 
 ### 新增

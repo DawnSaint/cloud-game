@@ -1,4 +1,4 @@
-import type { TRoles } from '../roles';
+import type { TRoles } from './roles';
 
 export interface AssassinateProgressData {
   type: TAssassinateType;

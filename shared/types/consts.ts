@@ -1,4 +1,4 @@
-import type { TGoodRoles, TEvilRoles } from './game/roles';
+import type { TGoodRoles, TEvilRoles } from './games/avalon/roles';
 
 export const evilRolesImportance: { [key in TEvilRoles]: number } = {
   mordred: 1,

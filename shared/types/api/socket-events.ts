@@ -1,14 +1,14 @@
 import type { Server as SuperServer, Socket as SuperServerSocket } from 'socket.io';
 import type { Socket as SuperSocket } from 'socket.io-client';
 
-import type { TRoomState } from '../room';
-import type { TRoomsList } from '../room/list';
-import type { VisualGameState } from '../game/state';
-import type { GameOptions } from '../game/options';
-import type { TVoteOption } from '../game/vote';
-import type { TMissionResult } from '../game/mission';
-import type { TRoles } from '../game/roles';
-import type { TAssassinateType } from '../game/addons';
+import type { TRoomState } from '../common/room';
+import type { TRoomsList } from '../common/room-list';
+import type { VisualGameState } from '../games/avalon/state';
+import type { GameOptions } from '../games/avalon/options';
+import type { TVoteOption } from '../games/avalon/vote';
+import type { TMissionResult } from '../games/avalon/mission';
+import type { TRoles } from '../games/avalon/roles';
+import type { TAssassinateType } from '../games/avalon/addons';
 import type { IRoomUnavailableError } from './errors';
 import type { TTotalWinrateStats } from '../stats';
 import type { PublicUserProfile } from '../user';

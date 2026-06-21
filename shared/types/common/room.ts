@@ -1,7 +1,10 @@
-import type { VisualGameState } from '../game/state';
-import type { GameOptions } from '../game/options';
+import type { TGameType, TGameConfig } from './game';
+import type { VisualGameState } from '../games/avalon/state';
 
-export type TRoomState = CreatedRoomState | LockedRoomState | StartedRoomState;
+export interface RoomPlayer {
+  id: string;
+  isLeader: boolean;
+}
 
 export type TVoteTarget = 'endGame' | 'endAndRestartGame';
 
@@ -18,14 +21,19 @@ export interface VoteInRoom {
   result: VoteRoomResult;
 }
 
+export interface VoteOfPlayer extends RoomPlayer {
+  voteResult?: boolean;
+}
+
 export interface BaseRoomState {
+  gameType: TGameType;
   stage: 'created' | 'locked' | 'started';
   roomID: string;
   leaderID: string;
   createAt: string;
   players: RoomPlayer[];
   vote?: VoteInRoom;
-  options: GameOptions;
+  config: TGameConfig;
 }
 
 export interface CreatedRoomState extends BaseRoomState {
@@ -42,11 +50,4 @@ export interface StartedRoomState extends BaseRoomState {
   game: VisualGameState;
 }
 
-export interface RoomPlayer {
-  id: string;
-  isLeader: boolean;
-}
-
-export interface VoteOfPlayer extends RoomPlayer {
-  voteResult?: boolean;
-}
+export type TRoomState = CreatedRoomState | LockedRoomState | StartedRoomState;

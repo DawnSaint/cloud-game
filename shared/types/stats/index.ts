@@ -1,4 +1,4 @@
-import type { TOptionalRoles } from '../game/roles';
+import type { TOptionalRoles } from '../games/avalon/roles';
 
 export type TTotalWinrateStats = {
   total: TWinrateStats;

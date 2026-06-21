@@ -3,14 +3,14 @@ import type { MissionWithResult } from './mission';
 import type { GameSettingsWithRoles } from './settings';
 import type { THistoryResults } from './history';
 import type { TLoyalty } from './roles';
-import type { Dictionary } from '../utils';
+import type { Dictionary } from '../../utils';
 
 export interface GameResults {
   winner?: TLoyalty;
   reason: TGameEndReasons;
 }
 
-export interface VisualGameState {
+export interface AvalonGameState {
   result?: GameResults;
   uuid: string;
   stage: TGameStage;
@@ -22,6 +22,8 @@ export interface VisualGameState {
   players: Player[];
   debug?: Dictionary<unknown>;
 }
+
+export type VisualGameState = AvalonGameState;
 
 export type TGameStage =
   | 'initialization'

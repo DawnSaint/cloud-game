@@ -22,6 +22,8 @@ cloud-game/
   app/               # Nuxt app 入口
     pages/           # 文件路由
     components/      # Vue 组件
+      common/        # 通用组件（玩家列表、房主控制等）
+      games/         # 游戏专属组件（avalon/ 等）
     composables/     # 组合式函数
     layouts/         # 布局
     middleware/      # 中间件
@@ -29,12 +31,17 @@ cloud-game/
   server/            # Nitro server（API routes, WebSocket, 游戏逻辑）
     api/             # REST API
     game/            # 游戏逻辑
+      registry.ts    # 游戏注册表（gameType → GameEngine）
+      avalon/        # Avalon 引擎
     db/              # 数据库层
       models/        # Mongoose Models（User, Room）
     plugins/         # Nitro 插件（Socket.IO 初始化、MongoDB 连接）
     utils/           # 服务端工具
   shared/            # 前后端共享类型与常量
-    types/           # 领域模型（纯 interface/type，无 Mongoose 依赖）
+    types/
+      common/        # 通用类型（room, user, api 等）
+      games/         # 游戏专属类型
+        avalon/      # Avalon（角色、状态、配置等）
   docs/              # 项目文档
   tests/             # 自动化测试（按模块分子目录）
   nuxt.config.ts
@@ -91,46 +98,6 @@ git subtree pull --prefix=_reference upstream master --squash
 - **提交格式**: 见下方「Commit Message 格式规约」
 - **Vue**: 新组件使用 Composition API + `<script setup>`
 - **文档与注释**: 简洁精确，只写关键点（为什么这样做、隐藏约束、非显而易见的权衡）。不重复代码已表达的信息，不写大段说明、背景铺垫或示例废话。宁可少一行也不多一行。
-
-### Commit Message 格式规约
-
-```
-<type>(version): <summary>
-
-Feat:
-- English bullet 1
-- English bullet 2
-
-Fix:
-- English bullet
-
-Feat:
-- 中文 bullet 1
-- 中文 bullet 2
-
-Fix:
-- 中文 bullet
-
-```
-
-- **type**：`feat` / `fix` / `refactor` / `docs` / `test` / `chore`
-- **version**：当前项目版本（`v<major>.<minor>.<patch>`），同一版本的多个 commit 共用同一 scope
-- **summary**：1 句概括性的英文，描述"这次 commit 干了什么"
-
-**Body**
-
-按改动类型分组，每组用 `<Type>:` 开头；英文 bullet 在前，中文 bullet 复述在后。依赖变更（`Cargo.toml` / `package.json`）单独用 `依赖变更：` section 收口，如果没有则可以跳过此项。
-
-### 版本发布
-
-用户说"升级版本"或类似意图时，自动执行：
-
-```bash
-npm version <level> -f -m <commit message>
-```
-
-- `<level>` 为 `patch` / `minor` / `major`，由用户指定或根据改动范围判断
-- 完成后提醒用户 `git push --follow-tags` 推送 commit 和 tag
 
 ## 测试规范
 
@@ -191,6 +158,51 @@ tests/
 3. **功能完成勾选路线图** —— 完成 `docs/roadmap.md` 中某个待办项后，将 `[ ]` 改为 `[x]`。
 4. **开发约束新增即写入** —— 新增编码规范、测试约束、提交规范等，写入 `AGENTS.md` 对应章节。
 5. **不确定是否该更新时，更新** —— 宁可文档多一行冗余信息，也不要让文档与代码脱节。
+
+## Git 规范
+
+### Commit Message 格式规约
+
+```
+<type>(version): <summary>
+
+Feat:
+- English bullet 1
+- English bullet 2
+
+Fix:
+- English bullet
+
+Feat:
+- 中文 bullet 1
+- 中文 bullet 2
+
+Fix:
+- 中文 bullet
+
+```
+
+- **type**：`feat` / `fix` / `refactor` / `docs` / `test` / `chore`
+- **version**：当前项目版本（`v<major>.<minor>.<patch>`），同一版本的多个 commit 共用同一 scope
+- **summary**：1 句概括性的英文，描述"这次 commit 干了什么"
+
+**Body**
+
+按改动类型分组，每组用 `<Type>:` 开头；英文 bullet 在前，中文 bullet 复述在后。依赖变更（`Cargo.toml` / `package.json`）单独用 `依赖变更：` section 收口，如果没有则可以跳过此项。
+
+### 版本发布
+
+版本发布提交时，将现有改动都合进一个发版提交，不拆分为 feat commit 和 release commit。
+
+```bash
+npm version <level> -f -m <commit message>
+```
+
+- `<level>` 为 `patch` / `minor` / `major`，由用户指定或根据改动范围判断
+- `<commit message>` 即发版提交的 message，按上方 Commit Message 格式规约写，type 写 `release`
+- 完成后执行 `git push --follow-tags` 推送 commit 和 tag
+
+
 
 ## 开发环境
 

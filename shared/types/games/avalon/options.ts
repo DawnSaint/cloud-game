@@ -22,6 +22,8 @@ export interface GameOptionsRoles {
   revealer?: number;
 }
 
-export interface GameOptions {
+export interface AvalonGameConfig {
   roles: GameOptionsRoles;
 }
+
+export type GameOptions = AvalonGameConfig;
