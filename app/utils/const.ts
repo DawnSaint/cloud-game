@@ -7,3 +7,7 @@ export const socketURL = process.env.NODE_ENV === 'production'
 export const userProfilePath = '__user-profile__'
 export const userSettingsPath = '__user-settings__'
 export const alertStoragePath = '__user-alerts__'
+
+// 开发态快捷登录测试账号（走真实 register/login 链路）
+export const DEV_LOGIN = 'dev'
+export const DEV_PASSWORD = 'devpassword'

@@ -63,6 +63,18 @@ describe('registerUser', () => {
     expect(result).toEqual({ error: 'loginAlreadyExist' })
   })
 
+  it('非 login 字段的唯一键冲突（如旧 email 索引非 sparse）会向上抛出，不被误判为 loginAlreadyExist', async () => {
+    const dupError = Object.assign(new Error('E11000 duplicate key error: dup null on email_1'), {
+      code: 11000,
+      keyPattern: { email: 1 },
+      keyValue: { email: null },
+    })
+    mockSave.mockRejectedValueOnce(dupError)
+
+    const { registerUser } = await import('../../server/db/user')
+    await expect(registerUser(registerParams)).rejects.toThrow(/duplicate key/)
+  })
+
   it('使用 bcrypt 对密码进行哈希', async () => {
     mockSave.mockResolvedValueOnce(undefined)
     const bcrypt = (await import('bcryptjs')).default

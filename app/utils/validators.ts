@@ -13,6 +13,14 @@ export const validators = {
     return { valid: false, message: '此字段为必填项' };
   },
 
+  // 最小长度验证（6位）
+  min6: (value: string): ValidationResult => {
+    if (value.length >= 6) {
+      return { valid: true };
+    }
+    return { valid: false, message: '最少需要6个字符' };
+  },
+
   // 最小长度验证（8位）
   min8: (value: string): ValidationResult => {
     if (value.length >= 8) {

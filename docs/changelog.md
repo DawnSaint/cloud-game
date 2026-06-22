@@ -4,6 +4,26 @@
 
 ---
 
+## [0.1.3]
+
+### 变更
+
+- 开发态认证流程优化：移除原先自动以「开发测试用户」登录的假 token 机制（其依赖的 `devMPLogin` 服务端事件从未实现，静默失败），dev 启动即进入未登录态、展示真实注册/登录表单
+- 新增开发态快捷登录：`Pinia store` 的 `devQuickLogin` action，通过真实 `register`/`login` 链路登录固定测试账号 `dev`/`devpassword`（不存在则自动注册）；登录页表单底部展示「以测试账号登录」按钮（仅 dev 可见）
+
+- `profile.vue` 登录/注册表单交互完善：接入既有 `validators.ts`（`required`/`min6`/`login`/`spacesForbidden`）做字段级校验，blur 触发、出错后输入实时重校，输入框下方内联错误提示
+- 密码最低位数从 8 位降为 6 位：`validators.ts` 新增 `min6` 校验器，登录/注册表单密码字段改用 `min6`（保留 `min8` 供后续改密等场景复用）
+- 注册重复键错误细化：`server/db/user.ts` 的 `registerUser` 不再把任意 `E11000` 笼统映射为 `loginAlreadyExist`，仅当冲突字段确为 `login` 时返回该错误，其他唯一键冲突（如旧 `email_1` 索引非 sparse 导致多个无 email 用户被判重）向上抛出真实错误，避免误导用户为"用户名已注册"
+- 新增运维脚本 `scripts/fix-email-index.mjs`：将历史遗留的 `users.email_1` 索引重建为 `unique + sparse`，让多个无 email 用户共存。需在升级到该版本前手动执行一次（`node scripts/fix-email-index.mjs`）
+- 密码可见性切换按钮（睁眼/闭眼 SVG，`aria-pressed` 状态反馈）
+- 注册新增"确认密码"字段，前端校验两次一致（服务端不接收）
+- 服务端错误码翻译：新增 `app/utils/login.ts` 的 `authErrorMessage`，将 `loginAlreadyExist`/`loginNotExist`/`wrongPassword` 等码映射为中文，可定位的错误同时挂到对应输入框（如"用户名不存在"→用户名框、"密码错误"→密码框）
+- 输入框字号提至 16px，避免 iOS 聚焦自动放大
+- 可访问性：每个输入框配 `sr-only` label、`aria-invalid`/`aria-describedby`、`autocomplete`（`username`/`current-password`/`new-password`）
+- 提交按钮在表单未校验通过时禁用；注册成功后保留用户名预填到登录态
+
+---
+
 ## [0.1.2]
 
 ### 新增

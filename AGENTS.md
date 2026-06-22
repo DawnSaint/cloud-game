@@ -212,3 +212,8 @@ npm version <level> -f -m <commit message>
 npm install
 npm run dev            # http://localhost:3000
 ```
+
+### 开发态认证流程
+
+dev 模式不再自动以测试用户登录，启动即进入未登录态、展示真实的注册/登录表单，便于测试认证链路。登录页底部有开发态可见的「以测试账号登录」按钮，点击后通过真实 `register`/`login` 链路登录固定账号 `dev`/`devpassword`（首次自动注册）。登录态持久化在 localStorage，刷新后保持登录；点击「退出登录」可回到表单重新测试。
+

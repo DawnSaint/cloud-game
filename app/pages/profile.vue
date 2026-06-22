@@ -61,39 +61,105 @@
 
       <div class="login-form">
         <div class="form-tabs">
-          <span class="form-tab" :class="{ active: formMode === 'login' }" @click="formMode = 'login'">登录</span>
-          <span class="form-tab" :class="{ active: formMode === 'register' }" @click="formMode = 'register'">注册</span>
+          <span class="form-tab" :class="{ active: formMode === 'login' }" @click="switchMode('login')">登录</span>
+          <span class="form-tab" :class="{ active: formMode === 'register' }" @click="switchMode('register')">注册</span>
         </div>
 
-        <div v-if="formMode === 'login'" class="form-body">
-          <input v-model="loginForm.login" class="form-input" placeholder="用户名" :disabled="loginLoading" >
-          <input
-            v-model="loginForm.password"
-            class="form-input"
-            type="password"
-            placeholder="密码"
-            :disabled="loginLoading"
-            @keyup.enter="handleLogin"
-          >
-          <button class="form-btn" :disabled="loginLoading" @click="handleLogin">
-            {{ loginLoading ? '登录中...' : '登录' }}
-          </button>
-        </div>
+        <form class="form-body" novalidate @submit.prevent="handleSubmit">
+          <!-- 用户名 -->
+          <div class="field">
+            <label class="sr-only" :for="`${formMode}-login`">用户名</label>
+            <div class="input-wrap">
+              <input
+                :id="`${formMode}-login`"
+                v-model="form.login"
+                class="form-input"
+                :class="{ 'is-invalid': errors.login }"
+                type="text"
+                placeholder="用户名"
+                autocomplete="username"
+                inputmode="text"
+                :disabled="loginLoading"
+                :aria-invalid="errors.login ? 'true' : undefined"
+                :aria-describedby="errors.login ? `${formMode}-login-error` : undefined"
+                @blur="validateField('login')"
+                @input="onFieldInput('login')"
+              >
+            </div>
+            <span v-if="errors.login" :id="`${formMode}-login-error`" class="field-error">{{ errors.login }}</span>
+          </div>
 
-        <div v-else class="form-body">
-          <input v-model="registerForm.login" class="form-input" placeholder="用户名" :disabled="loginLoading" >
-          <input
-            v-model="registerForm.password"
-            class="form-input"
-            type="password"
-            placeholder="密码"
-            :disabled="loginLoading"
-            @keyup.enter="handleRegister"
-          >
-          <button class="form-btn" :disabled="loginLoading" @click="handleRegister">
-            {{ loginLoading ? '注册中...' : '注册' }}
+          <!-- 密码 -->
+          <div class="field">
+            <label class="sr-only" :for="`${formMode}-password`">密码</label>
+            <div class="input-wrap">
+              <input
+                :id="`${formMode}-password`"
+                v-model="form.password"
+                class="form-input"
+                :class="{ 'is-invalid': errors.password }"
+                :type="showPassword ? 'text' : 'password'"
+                placeholder="密码"
+                :autocomplete="formMode === 'login' ? 'current-password' : 'new-password'"
+                inputmode="text"
+                :disabled="loginLoading"
+                :aria-invalid="errors.password ? 'true' : undefined"
+                :aria-describedby="errors.password ? `${formMode}-password-error` : undefined"
+                @blur="validateField('password')"
+                @input="onFieldInput('password')"
+                @keyup.enter="handleSubmit"
+              >
+              <button
+                type="button"
+                class="pwd-toggle"
+                :aria-label="showPassword ? '隐藏密码' : '显示密码'"
+                :aria-pressed="showPassword"
+                @click="showPassword = !showPassword"
+              >
+                <svg v-if="showPassword" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                  <path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 7.61 17 4.5 12 4.5zm0 12a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9zm0-2a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
+                </svg>
+                <svg v-else viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                  <path fill="currentColor" d="M2 5.27 3.28 4 20 20.72 18.73 22l-3.1-3.1A11.6 11.6 0 0 1 12 19.5C7 19.5 2.73 16.39 1 12a11.8 11.8 0 0 1 4.13-5.04L2 5.27zM6.23 9.5A4.5 4.5 0 0 0 12 16.5c.69 0 1.35-.16 1.94-.43l-1.55-1.55A2.5 2.5 0 0 1 9.5 12c0-.2.02-.4.07-.59L6.23 9.5zM12 8.5c2.49 0 4.5 2.01 4.5 4.5 0 .35-.04.69-.12 1.02l3.05 3.05A11.8 11.8 0 0 0 23 12c-1.73-4.39-6-7.5-11-7.5-1.1 0-2.16.16-3.16.45l2.3 2.3c.27-.08.56-.13.86-.16L12 8.5z"/>
+                </svg>
+              </button>
+            </div>
+            <span v-if="errors.password" :id="`${formMode}-password-error`" class="field-error">{{ errors.password }}</span>
+          </div>
+
+          <!-- 确认密码（仅注册） -->
+          <div v-if="formMode === 'register'" class="field">
+            <label class="sr-only" :for="`register-confirm`">确认密码</label>
+            <div class="input-wrap">
+              <input
+                id="register-confirm"
+                v-model="form.confirm"
+                class="form-input"
+                :class="{ 'is-invalid': errors.confirm }"
+                :type="showPassword ? 'text' : 'password'"
+                placeholder="确认密码"
+                autocomplete="new-password"
+                inputmode="text"
+                :disabled="loginLoading"
+                :aria-invalid="errors.confirm ? 'true' : undefined"
+                :aria-describedby="errors.confirm ? 'register-confirm-error' : undefined"
+                @blur="validateField('confirm')"
+                @input="onFieldInput('confirm')"
+                @keyup.enter="handleSubmit"
+              >
+            </div>
+            <span v-if="errors.confirm" id="register-confirm-error" class="field-error">{{ errors.confirm }}</span>
+          </div>
+
+          <button class="form-btn" type="submit" :disabled="!isFormValid || loginLoading">
+            {{ loginLoading ? (formMode === 'login' ? '登录中...' : '注册中...') : (formMode === 'login' ? '登录' : '注册') }}
           </button>
-        </div>
+
+          <!-- 开发态快捷登录：走真实 register/login 链路 -->
+          <button v-if="isDev" type="button" class="dev-login-btn" :disabled="loginLoading" @click="handleDevQuickLogin">
+            以测试账号登录
+          </button>
+        </form>
       </div>
     </div>
   </div>
@@ -107,12 +173,17 @@ import { socket } from '~/composables/useSocket';
 import HistoryView from '~/components/profile/HistoryView.vue';
 import LobbyLogo from '~/components/LobbyLogo.vue';
 import AchievementsView from '~/components/profile/AchievementsView.vue';
-import { webLogin, webRegister } from '~/utils/login';
+import { webLogin, webRegister, authErrorMessage } from '~/utils/login';
 import { showToast } from '~/composables/useUI';
+import { validators, validateForm } from '~/utils/validators';
+import type { ValidationResult, FormField } from '~/utils/validators';
 
 const store = useMainStore();
 const route = useRoute();
 const router = useRouter();
+
+// 开发态标记：仅在 dev 环境展示快捷登录入口
+const isDev = import.meta.dev;
 
 watch(() => store.isLoggedIn, (loggedIn) => {
   if (loggedIn) {
@@ -131,15 +202,138 @@ const currentView = ref<ViewType>('profile');
 const formMode = ref<'login' | 'register'>('login');
 const loginLoading = ref(false);
 
-const loginForm = reactive({
+type FieldName = 'login' | 'password' | 'confirm';
+
+const form = reactive({
   login: '',
   password: '',
+  confirm: '',
 });
 
-const registerForm = reactive({
+const errors = reactive<Record<FieldName, string>>({
   login: '',
   password: '',
+  confirm: '',
 });
+
+const touched = reactive<Record<FieldName, boolean>>({
+  login: false,
+  password: false,
+  confirm: false,
+});
+
+const showPassword = ref(false);
+
+// 当前模式下的字段规则（注册多一个确认密码字段）
+const fieldRules = computed<Record<FieldName, Array<(v: string) => ValidationResult>>>(() => {
+  const loginRules = [validators.required, validators.login, validators.spacesForbidden];
+  const passwordRules = [validators.required, validators.min6];
+
+  if (formMode.value === 'register') {
+    return {
+      login: loginRules,
+      password: passwordRules,
+      confirm: [
+        validators.required,
+        (v: string): ValidationResult => (v === form.password ? { valid: true } : { valid: false, message: '两次输入的密码不一致' }),
+      ],
+    };
+  }
+
+  return {
+    login: loginRules,
+    password: passwordRules,
+    confirm: [],
+  };
+});
+
+const validateField = (name: FieldName, markTouched = true) => {
+  if (markTouched) touched[name] = true;
+
+  const rules = fieldRules.value[name];
+  if (!rules.length) {
+    errors[name] = '';
+    return;
+  }
+
+  const result = validators.validateAll(form[name], rules);
+  errors[name] = result.valid ? '' : (result.message || '校验失败');
+};
+
+// blur 后才进入"实时重校"：首次出错后输入即更新错误状态
+const onFieldInput = (name: FieldName) => {
+  if (touched[name]) {
+    validateField(name, false);
+  }
+  // 密码改动后，若确认密码已校验过，需同步重校
+  if (name === 'password' && touched.confirm) {
+    validateField('confirm', false);
+  }
+};
+
+const isFormValid = computed(() => {
+  const fields: Record<string, FormField> = {};
+  (Object.keys(fieldRules.value) as FieldName[]).forEach((name) => {
+    const rules = fieldRules.value[name];
+    if (rules.length) {
+      fields[name] = { value: form[name], rules };
+    }
+  });
+  return validateForm(fields).valid;
+});
+
+const switchMode = (mode: 'login' | 'register') => {
+  if (formMode.value === mode) return;
+  formMode.value = mode;
+  // 切换时保留用户名，清空密码相关字段与错误
+  form.password = '';
+  form.confirm = '';
+  errors.login = '';
+  errors.password = '';
+  errors.confirm = '';
+  touched.login = false;
+  touched.password = false;
+  touched.confirm = false;
+  showPassword.value = false;
+};
+
+// 提交前整表校验，返回是否通过
+const validateAll = (): boolean => {
+  (Object.keys(fieldRules.value) as FieldName[]).forEach((name) => {
+    if (fieldRules.value[name].length) {
+      validateField(name, true);
+    }
+  });
+  return isFormValid.value;
+};
+
+// 聚焦首个出错字段
+const focusFirstInvalid = () => {
+  const order: FieldName[] = formMode.value === 'register'
+    ? ['login', 'password', 'confirm']
+    : ['login', 'password'];
+  for (const name of order) {
+    if (errors[name]) {
+      const id = name === 'confirm' ? 'register-confirm' : `${formMode.value}-${name}`;
+      document.getElementById(id)?.focus();
+      break;
+    }
+  }
+};
+
+const handleSubmit = async () => {
+  if (loginLoading.value) return;
+  if (!validateAll()) {
+    focusFirstInvalid();
+    return;
+  }
+  if (formMode.value === 'login') {
+    await handleLogin();
+  }
+  else {
+    await handleRegister();
+  }
+};
 
 // 统计信息相关状态
 const statsLoading = ref(true);
@@ -224,56 +418,92 @@ onMounted(() => {
 });
 
 const handleLogin = async () => {
-  if (!loginForm.login || !loginForm.password) {
-    showToast({ title: '请填写完整的登录信息', icon: 'none' });
-    return;
-  }
-
   loginLoading.value = true;
 
   try {
-    const result = await webLogin(loginForm.login, loginForm.password);
+    const result = await webLogin(form.login, form.password);
 
     if (result.success) {
       showToast({ title: '登录成功', icon: 'success', duration: 2000 });
-      loginForm.login = '';
-      loginForm.password = '';
+      form.login = '';
+      form.password = '';
+      form.confirm = '';
       await initStats();
-    } else {
-      showToast({ title: result.error || '登录失败', icon: 'none', duration: 2000 });
+    }
+    else {
+      applyServerError(result.error, 'login');
     }
   } catch (e) {
     console.error('Login error:', e);
-    showToast({ title: '登录失败', icon: 'none', duration: 2000 });
+    showToast({ title: '登录失败，请稍后重试', icon: 'none', duration: 2000 });
   } finally {
     loginLoading.value = false;
   }
 };
 
 const handleRegister = async () => {
-  const { login, password } = registerForm;
-  if (!login || !password) {
-    showToast({ title: '请填写完整的注册信息', icon: 'none' });
-    return;
-  }
-
   loginLoading.value = true;
 
   try {
-    const result = await webRegister({ login, password });
+    const result = await webRegister({ login: form.login, password: form.password });
 
     if (result.success) {
       showToast({ title: '注册成功', icon: 'success', duration: 2000 });
-      registerForm.login = '';
-      registerForm.password = '';
+      // 注册即自动登录；保留用户名预填到登录态以备边界情况
+      const registeredLogin = form.login;
+      form.password = '';
+      form.confirm = '';
       formMode.value = 'login';
+      form.login = registeredLogin;
       await initStats();
-    } else {
-      showToast({ title: result.error || '注册失败', icon: 'none', duration: 2000 });
+    }
+    else {
+      applyServerError(result.error, 'register');
     }
   } catch (e) {
     console.error('Register error:', e);
-    showToast({ title: '注册失败', icon: 'none', duration: 2000 });
+    showToast({ title: '注册失败，请稍后重试', icon: 'none', duration: 2000 });
+  } finally {
+    loginLoading.value = false;
+  }
+};
+
+// 把服务端错误码映射成字段级内联错误 + toast
+const applyServerError = (code: string | undefined, mode: 'login' | 'register') => {
+  const message = authErrorMessage(code);
+
+  if (mode === 'login') {
+    if (code === 'loginNotExist') errors.login = message;
+    else if (code === 'wrongPassword') errors.password = message;
+  }
+  else if (code === 'loginAlreadyExist') {
+    errors.login = message;
+  }
+
+  showToast({ title: message, icon: 'none', duration: 2000 });
+};
+
+// 开发态快捷登录：登录固定测试账号（不存在则自动注册），全程走真实认证链路
+const handleDevQuickLogin = async () => {
+  if (loginLoading.value) return;
+  loginLoading.value = true;
+
+  try {
+    const result = await store.devQuickLogin();
+
+    if (result.success) {
+      showToast({ title: '已以测试账号登录', icon: 'success', duration: 2000 });
+      form.login = '';
+      form.password = '';
+      form.confirm = '';
+      await initStats();
+    }
+    else {
+      showToast({ title: authErrorMessage(result.error), icon: 'none', duration: 2000 });
+    }
+  } catch (e) {
+    console.error('Dev quick login error:', e);
+    showToast({ title: '登录失败，请稍后重试', icon: 'none', duration: 2000 });
   } finally {
     loginLoading.value = false;
   }
@@ -430,6 +660,18 @@ const handleLogout = () => {
 }
 
 // 登录/注册表单
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .auth-container {
   min-height: 60vh;
 }
@@ -468,11 +710,26 @@ const handleLogout = () => {
   gap: 14px;
 }
 
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 .form-input {
+  width: 100%;
+  box-sizing: border-box;
   padding: 12px 16px;
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: $radius-medium;
-  font-size: $font-md;
+  // 16px 避免 iOS 聚焦自动放大
+  font-size: $font-lg;
   color: $text-primary;
   background: $bg-card;
   outline: none;
@@ -485,6 +742,41 @@ const handleLogout = () => {
   &::placeholder {
     color: $text-disabled;
   }
+
+  &.is-invalid {
+    border-color: $error;
+  }
+
+  // 密码字段右侧需给切换按钮留位
+  .input-wrap:has(.pwd-toggle) & {
+    padding-right: 44px;
+  }
+}
+
+.pwd-toggle {
+  position: absolute;
+  right: $spacing-sm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: $text-secondary;
+  cursor: pointer;
+  transition: opacity $transition-normal;
+
+  &:active {
+    opacity: 0.5;
+  }
+}
+
+.field-error {
+  font-size: $font-sm;
+  color: $error;
+  line-height: 1.4;
 }
 
 .form-btn {
@@ -502,6 +794,28 @@ const handleLogout = () => {
 
   &:active {
     opacity: 0.8;
+  }
+
+  &[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// 开发态快捷登录：刻意低调，避免抢主操作的视觉权重
+.dev-login-btn {
+  margin-top: $spacing-sm;
+  height: 36px;
+  background: transparent;
+  color: $text-secondary;
+  font-size: $font-sm;
+  border: 1px dashed rgba(0, 0, 0, 0.15);
+  border-radius: $radius-medium;
+  cursor: pointer;
+  transition: opacity $transition-normal;
+
+  &:active {
+    opacity: 0.6;
   }
 
   &[disabled] {

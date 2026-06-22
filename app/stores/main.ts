@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { socket } from '~/composables/useSocket';
-import { userProfilePath, userSettingsPath, alertStoragePath } from '~/utils/const';
+import { userProfilePath, userSettingsPath, alertStoragePath, DEV_LOGIN, DEV_PASSWORD } from '~/utils/const';
 import type { UserWithToken, IUserSettings, TUserState, TAlerts, TAlertsName, Dictionary } from '~/types';
 import { showToast } from '~/composables/useUI';
 
@@ -44,37 +44,9 @@ function setStorageData(key: string, data: any) {
   }
 }
 
-function getDevProfile(): UserWithToken | null {
-  if (typeof window === 'undefined') return null;
-
-  const isDev = process.env.NODE_ENV === 'development';
-
-  if (!isDev) {
-    return null;
-  }
-
-  const storedProfile = getStorageData<UserWithToken | null>(userProfilePath, null);
-
-  // 如果已有profile，返回已有的
-  if (storedProfile) {
-    return storedProfile;
-  }
-
-  // 返回临时 profile，真实 token 会在连接后自动获取
-  const tempProfile: any = {
-    id: 'mp_dev000000000000',
-    name: '开发测试用户',
-    avatar: 'servant',
-    token: 'dev-token-temp', // 临时标记，会在 socket 连接后自动替换
-    userType: 'miniprogram',
-  };
-
-  return tempProfile;
-}
-
 export const useMainStore = defineStore('main', {
   state: (): State => ({
-    profile: getStorageData<UserWithToken | null>(userProfilePath, null) || getDevProfile(),
+    profile: getStorageData<UserWithToken | null>(userProfilePath, null),
     users: {},
     settings: getStorageData<IUserSettings | null>(userSettingsPath, null),
     hideSpoilers: false,
@@ -190,6 +162,22 @@ export const useMainStore = defineStore('main', {
       return user;
     },
 
+    // 开发态快捷登录：先尝试登录固定测试账号，不存在则注册。全程走真实 register/login 链路。
+    async devQuickLogin(): Promise<{ success: boolean; error?: string }> {
+      let result = await this.login(DEV_LOGIN, DEV_PASSWORD);
+
+      // 账号不存在 → 注册一个
+      if (result && 'error' in result && result.error === 'loginNotExist') {
+        result = await this.registerUser({ login: DEV_LOGIN, password: DEV_PASSWORD });
+      }
+
+      if (result && 'error' in result) {
+        return { success: false, error: result.error };
+      }
+
+      return { success: true };
+    },
+
     // 更新用户密码
     async updateUserPassword(password: string, newPassword: string) {
       return await socket.emitWithAck('updateUserPassword', password, newPassword);
@@ -257,19 +245,6 @@ if (typeof window !== 'undefined') {
   socket.on('connect', async () => {
     const store = useMainStore();
     store.updateConnectState(true);
-
-    const isDev = process.env.NODE_ENV === 'development';
-    if (isDev && store.profile?.token === 'dev-token-temp') {
-      try {
-        const user = await socket.emitWithAck('devMPLogin');
-        if (user && !('error' in user)) {
-          console.log('[Dev Mode] 自动获取真实 token 成功');
-          store.updateUserProfile(user as any);
-        }
-      } catch (e) {
-        console.warn('[Dev Mode] 自动获取 token 失败，后端可能未启动开发用户迁移', e);
-      }
-    }
   });
 
   socket.on('disconnect', () => {

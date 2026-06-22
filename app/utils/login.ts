@@ -5,6 +5,21 @@ export interface LoginResult {
   error?: string;
 }
 
+// 服务端认证错误码 → 中文提示。仅覆盖用户名+密码流程会出现的码；
+// 未知码统一兜底。供 profile.vue 及后续改密/改登录名流程复用。
+const AUTH_ERROR_MESSAGES: Record<string, string> = {
+  loginAlreadyExist: '用户名已被注册',
+  loginNotExist: '用户名不存在',
+  wrongPassword: '密码错误',
+};
+
+export function authErrorMessage(code?: string): string {
+  if (code && AUTH_ERROR_MESSAGES[code]) {
+    return AUTH_ERROR_MESSAGES[code]!;
+  }
+  return '操作失败，请稍后重试';
+}
+
 /**
  * Web 端登录（用户名/邮箱 + 密码）
  */

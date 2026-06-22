@@ -15,6 +15,16 @@ describe('validators.required', () => {
   })
 })
 
+describe('validators.min6', () => {
+  it('should pass for 6+ chars', () => {
+    expect(validators.min6('123456')).toEqual({ valid: true })
+  })
+
+  it('should fail for less than 6 chars', () => {
+    expect(validators.min6('12345')).toEqual({ valid: false, message: '最少需要6个字符' })
+  })
+})
+
 describe('validators.min8', () => {
   it('should pass for 8+ chars', () => {
     expect(validators.min8('12345678')).toEqual({ valid: true })

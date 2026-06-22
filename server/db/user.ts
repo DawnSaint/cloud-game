@@ -26,8 +26,14 @@ function toUserWithToken(user: UserForUI): UserWithToken {
   }
 }
 
-function isDuplicateKeyError(err: unknown): err is Error & { code: number } {
+function isDuplicateKeyError(err: unknown): err is Error & { code: number; keyPattern?: Record<string, number>; keyValue?: Record<string, unknown> } {
   return err instanceof Error && 'code' in err && (err as Error & { code: number }).code === 11000
+}
+
+function duplicateField(err: Error & { keyPattern?: Record<string, number>; keyValue?: Record<string, unknown> }): string | undefined {
+  if (err.keyPattern) return Object.keys(err.keyPattern)[0]
+  if (err.keyValue) return Object.keys(err.keyValue)[0]
+  return undefined
 }
 
 export async function registerUser(
@@ -49,7 +55,10 @@ export async function registerUser(
   }
   catch (err) {
     if (isDuplicateKeyError(err)) {
-      return { error: 'loginAlreadyExist' }
+      const field = duplicateField(err)
+      // 仅 login 字段冲突时报"用户名已注册"；其他唯一索引冲突（典型：旧 email 索引非 sparse、多个无 email 用户被判重）按真实错误抛出，避免误导。
+      if (field === 'login') return { error: 'loginAlreadyExist' }
+      throw err
     }
     throw err
   }

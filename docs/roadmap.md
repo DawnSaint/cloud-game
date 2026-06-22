@@ -38,7 +38,7 @@
 - [x] 登录 API — `POST /api/auth/login`（邮箱 + 密码 → JWT）
 - [x] 用户资料 API — `GET /api/user/profile`，`PUT /api/user/profile`
 - [x] Socket.IO 认证中间件 — 连接时验证 JWT，绑定 userId 到 socket
-- [ ] 前端登录/注册页面 — 完善 `profile.vue` 表单交互，移动端适配
+- [x] 前端登录/注册页面 — 完善 `profile.vue` 表单交互，移动端适配
 - [x] 认证状态管理 — Pinia store 持久化 token，路由守卫（未登录跳转）
 
 ---
