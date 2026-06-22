@@ -251,7 +251,9 @@ const initRoom = async (uuid: string) => {
   try {
     const state = await socket.emitWithAck<TRoomState | ISocketError>('joinRoom', uuid);
 
-    if ('error' in state) {
+    if (!state) {
+      errorMessage.value = { error: 'connection_failed' };
+    } else if ('error' in state) {
       errorMessage.value = state;
     } else {
       roomState.value = state;
@@ -471,8 +473,11 @@ const handleKickPlayer = async (playerId: string) => {
 // 获取错误文本
 const getErrorText = (error: string): string => {
   const errorMap: Record<string, string> = {
-    room_not_found: '房间不存在',
-    room_is_full: '房间已满',
+    errorNotFound: '房间不存在',
+    errorLocked: '房间已锁定',
+    errorAlreadyInRoom: '已在房间中',
+    errorNotInRoom: '未在该房间中',
+    errorNotLeader: '仅房主可操作',
     connection_failed: '连接失败',
     not_authorized: '未授权',
   };

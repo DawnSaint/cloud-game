@@ -29,3 +29,26 @@ export interface IUpdateAvatarError extends ISocketError {
 export interface IUpdatePasswordError extends ISocketError {
   error: 'wrongPassword';
 }
+
+export interface IRoomLockedError extends ISocketError {
+  error: 'errorLocked';
+}
+
+export interface IRoomAlreadyInError extends ISocketError {
+  error: 'errorAlreadyInRoom';
+}
+
+export interface IRoomNotInError extends ISocketError {
+  error: 'errorNotInRoom';
+}
+
+export interface IRoomNotLeaderError extends ISocketError {
+  error: 'errorNotLeader';
+}
+
+export type RoomError =
+  | IRoomUnavailableError
+  | IRoomLockedError
+  | IRoomAlreadyInError
+  | IRoomNotInError
+  | IRoomNotLeaderError;

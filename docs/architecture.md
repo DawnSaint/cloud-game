@@ -50,6 +50,9 @@ cloud-game/
     api/             # REST API（/api/rooms, /api/user 等）
     game/            # 游戏逻辑
       registry.ts    # 游戏注册表（gameType → GameEngine）
+      rooms.ts       # 通用房间服务（v0.1.4 内存状态 + 生命周期）
+      rooms/         # 房间 Socket 事件绑定
+        handlers.ts  # 房间 Socket 事件注册（v0.1.4）
       avalon/        # Avalon 引擎（engine, roles, missions, addons）
     db/              # 数据库层（Models, Queries）
       models/        # Mongoose Models（User, Room）
@@ -130,6 +133,25 @@ cloud-game/
 - `getVisualState(state, playerId): VisualGameState` — 按玩家视角裁剪状态
 
 接入新游戏只需实现 `TGameEngine` 接口并注册到 registry。
+
+#### 房间数据层（v0.1.4）
+
+通用房间系统是游戏无关的，所有游戏复用同一套服务。设计要点：
+
+- **内存状态**：`server/game/rooms.ts` 维护 `Map<uuid, TRoomState>`，进程内即全部真相。状态包括 `stage: 'created' | 'locked' | 'started'`、`gameType`、`leaderID`、`players[]`、`config` 等。持久化推迟到 v0.4.x（游戏历史阶段）。
+- **生命周期状态机**：
+  - `createRoom(creatorId)` → creator 为 leader/唯一玩家，stage=`created`，广播 `roomUpdated` + `roomsListUpdated`
+  - `joinRoom(roomId, userId)` → 校验 stage≠`locked` 且未在玩家列表中；成功则 push player 并广播
+  - `leaveRoom(roomId, userId)` → 普通玩家直接移除；房主离开且房间非空时转移 leader 给 `players[0]`，并重新设置所有 `isLeader` 标志；房主离开且房间为空时 `rooms.delete(uuid)`、广播 `destroyRoom` + `roomsListUpdated`
+  - `lockRoom(roomId, requesterId)` → 仅 leader 可调用，stage 在 `created` 与 `locked` 之间切换
+  - `kickPlayer(roomId, requesterId, targetId)` → 仅 leader 可调用，移除目标玩家；不允许 self-kick
+- **Socket.IO 广播拓扑**：
+  - `lobby` 通道：所有已认证 socket 加入，接收 `roomsListUpdated`（大厅列表的实时刷新）
+  - 房间号通道（`roomId`）：仅该房间的玩家 socket 加入，接收 `roomUpdated` / `destroyRoom`
+  - 每次房间状态变更同时广播 `roomUpdated` 到房间号通道、`roomsListUpdated` 到 `lobby` 通道
+- **鉴权桥**：`socket.data.userId` 在 `server/plugins/socket.io.ts` 的 JWT 验证后缓存，房间 handlers 通过 `requireUserId(socket)` 读取；缺失则 `socket.emit('serverError', 'unauthorized')` 后拒绝
+- **断线清理**：`server/game/rooms/handlers.ts` 的 `joinRoom` 在成功后将 `socketId → roomId` 写入反向索引；`disconnect` 事件在 `server/plugins/socket.io.ts` 中查反向索引并调用 `leaveRoom`，让房主转移与空房销毁逻辑正常触发，避免内存残留
+- **REST 端点**：`GET /api/rooms`（列表）、`GET /api/rooms/:id`（详情），均要求 JWT（通过 `server/utils/auth.ts: getAuthPayload` 从 `Authorization: Bearer` 头或 `auth-token` cookie 提取）
 
 #### 类型系统分层
 

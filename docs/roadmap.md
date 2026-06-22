@@ -4,60 +4,21 @@
 
 ---
 
-## v0.1.0 — 多游戏类型重构
-
-将现有 Avalon 耦合类型重构为通用 + 游戏分层，为后续开发扫清架构障碍。
-
-- [x] 新建 `shared/types/common/` — 通用房间类型（TRoomState 增加 gameType）、用户类型迁移
-- [x] 新建 `shared/types/games/avalon/` — 现有 `game/` 类型整体迁入，GameOptions → AvalonGameConfig
-- [x] Socket 事件类型分层 — 通用事件接口 + 游戏事件接口，ClientToServerEvents 拆分
-- [x] Room Model 增加 `gameType` 字段 — 迁移 `options` → `config`，保持向后兼容
-- [x] TRoomInfo 更新 — 房间列表项增加 gameType，options 改为 gameConfig
-- [x] 清理旧类型路径 — `shared/types/room/`、`shared/types/game/` 物理目录已移除，根 barrel 作为唯一公共入口
-
----
-
-## v0.1.1 — 服务端认证核心
-
-补齐服务端认证链路，让客户端注册/登录/会话管理跑通。
-
-- [x] 用户数据服务层 — `server/db/user.ts`（bcrypt 哈希、注册、登录、凭据更新）
-- [x] Socket.IO 认证中间件 — 连接时验证 JWT，绑定 userId 到 socket，无效 token 触发 renewJWT
-- [x] Socket 认证事件处理器 — registerUser、login、getMyProfile、updateUser* 全套服务端实现
-- [x] Socket 事件类型补全 — `CommonClientToServerEvents` 增加 auth 事件类型定义
-- [x] 前端登出功能 — Pinia store logout action + profile.vue 退出登录按钮
-- [x] 用户服务单元测试 — `tests/db/user.test.ts` 覆盖注册、登录、凭据更新核心路径
-
----
-
-## v0.2.0 — 用户认证
-
-实现注册/登录/会话管理，为房间系统提供用户身份基础。
-
-- [x] 注册 API — `POST /api/auth/register`（昵称、邮箱、密码）
-- [x] 登录 API — `POST /api/auth/login`（邮箱 + 密码 → JWT）
-- [x] 用户资料 API — `GET /api/user/profile`，`PUT /api/user/profile`
-- [x] Socket.IO 认证中间件 — 连接时验证 JWT，绑定 userId 到 socket
-- [x] 前端登录/注册页面 — 完善 `profile.vue` 表单交互，移动端适配
-- [x] 认证状态管理 — Pinia store 持久化 token，路由守卫（未登录跳转）
-
----
-
-## v0.3.0 — 通用房间系统
+## v0.1.x — 通用房间系统
 
 实现与游戏无关的房间管理和大厅，打通前后端核心链路。
 
-- [ ] 房间 REST API — `GET /api/rooms`（列表）、`GET /api/rooms/:id`（详情）
-- [ ] 通用房间 Socket 事件 — createRoom(gameType)、joinRoom、leaveRoom、kickPlayer、lockRoom
-- [ ] 房间状态广播 — roomUpdated 事件推送完整房间状态，玩家加入/离开/踢出实时同步
-- [ ] 大厅房间列表 — 在线房间列表、实时刷新、移动端列表 UI
-- [ ] 创建房间流程 — 选择游戏类型 → 创建 → 跳转房间页
-- [ ] 房间内通用 UI — 玩家列表、房主控制（踢人/锁房）、加入/离开按钮
-- [ ] 房间生命周期管理 — 所有人离开自动销毁、房主离开转移权限
+- [x] 房间 REST API — `GET /api/rooms`（列表）、`GET /api/rooms/:id`（详情）
+- [x] 通用房间 Socket 事件 — createRoom、joinRoom、leaveRoom、kickPlayer、lockRoom
+- [x] 房间状态广播 — roomUpdated 事件推送完整房间状态，玩家加入/离开/踢出实时同步
+- [x] 大厅房间列表 — 在线房间列表、实时刷新、移动端列表 UI
+- [ ] 创建房间流程 — 选择游戏类型 → 创建 → 跳转房间页（v0.1.4 硬编码 avalon，多游戏选择推迟到接入第二款游戏时）
+- [x] 房间内通用 UI — 玩家列表、房主控制（踢人/锁房）、加入/离开按钮
+- [x] 房间生命周期管理 — 所有人离开自动销毁、房主离开转移权限
 
 ---
 
-## v0.4.0 — Avalon 游戏引擎
+## v0.2.x — Avalon 游戏引擎
 
 实现 Avalon 服务端游戏引擎核心，支持角色分配和完整回合流转。
 
@@ -70,7 +31,7 @@
 
 ---
 
-## v0.5.0 — Avalon 核心玩法
+## v0.3.x — Avalon 核心玩法
 
 实现完整回合制玩法，Avalon 可玩。
 
@@ -83,7 +44,7 @@
 
 ---
 
-## v0.6.0 — Avalon 体验完善
+## v0.4.x — Avalon 体验完善
 
 补齐游戏体验，提升可玩性和稳定性。
 
@@ -91,11 +52,12 @@
 - [ ] 游戏设置面板 — 角色配置开关、人数限制、预设方案
 - [ ] 断线重连 — Socket.IO 重连 + 服务端状态恢复（重新推送当前游戏状态）
 - [ ] 游戏历史 — 对局结果持久化到 MongoDB，前端历史页面展示
-- [ ] 移动端 UI 打磨 — 触摸反馈、过渡动画、手势操作优化
+- [ ] UI 打磨 — 触摸反馈、过渡动画、手势操作优化
+- [ ] 成就系统
 
 ---
 
-## v0.7.0 — 测试与质量保证
+## v0.5.x — 测试与质量保证
 
 全面测试覆盖，修复已知问题，为首版发布做质量关卡。
 
@@ -110,20 +72,19 @@
 
 ## 后续扩展
 
-- [ ] 成就系统
-- [ ] 排行榜（按游戏、按角色、按时间维度）
-- [ ] 快速匹配 / 大厅推荐
 - [ ] 接入第二款游戏（验证多游戏架构）
-- [ ] 好友系统
+
 
 ---
 
 ## 暂不实现
 
 以下功能在当前阶段不纳入开发计划：
-
+- 好友系统
 - 聊天系统
+- 排行榜（按游戏、按角色、按时间维度）
 - 扩展玩法（Lady of the Lake / Lady of the Sea / Excalibur / Plot Cards）
 - 行动计时器
 - 国际化
 - 旁观模式
+- 快速匹配 / 大厅推荐

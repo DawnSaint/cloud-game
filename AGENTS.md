@@ -1,6 +1,4 @@
-# AGENTS.md - Cloud Game 项目上下文
-
-本文件为 AI 编码助手提供项目上下文。
+# Cloud Game
 
 ## 项目概述
 
@@ -32,6 +30,9 @@ cloud-game/
     api/             # REST API
     game/            # 游戏逻辑
       registry.ts    # 游戏注册表（gameType → GameEngine）
+      rooms.ts       # 通用房间服务（v0.1.4 内存状态 + 生命周期）
+      rooms/         # 房间 Socket 事件绑定
+        handlers.ts  # 房间 Socket 事件注册（v0.1.4）
       avalon/        # Avalon 引擎
     db/              # 数据库层
       models/        # Mongoose Models（User, Room）
@@ -60,7 +61,7 @@ git subtree pull --prefix=_reference upstream master --squash
 
 - 上游 remote 已配置为 `upstream`（`git@github.com:Razdva122/avalon.git`）
 
-## 上游关键参考索引
+**上游关键参考索引**
 
 | 需要了解的内容 | 参考路径 |
 |---|---|
@@ -123,7 +124,8 @@ tests/
   utils/                      # 工具函数测试
   composables/                # 组合式函数测试
   stores/                     # Pinia Store 测试
-  game/                       # 服务端游戏引擎测试
+  api/                        # REST 端点测试（v0.1.4 起）
+  game/                       # 服务端游戏逻辑与房间服务测试（v0.1.4 起）
   components/                 # Vue 组件测试
 ```
 
@@ -157,7 +159,6 @@ tests/
 2. **目录结构变更立即更新** —— 新增顶层目录或重要子目录时，同步更新 `AGENTS.md` 的项目结构。
 3. **功能完成勾选路线图** —— 完成 `docs/roadmap.md` 中某个待办项后，将 `[ ]` 改为 `[x]`。
 4. **开发约束新增即写入** —— 新增编码规范、测试约束、提交规范等，写入 `AGENTS.md` 对应章节。
-5. **不确定是否该更新时，更新** —— 宁可文档多一行冗余信息，也不要让文档与代码脱节。
 
 ## Git 规范
 

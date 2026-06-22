@@ -4,6 +4,37 @@
 
 ---
 
+## [0.1.4]
+
+### 新增
+
+- 通用房间数据层 `server/game/rooms.ts`：内存房间存储（`Map<uuid, TRoomState>`），生命周期服务函数（createRoom/joinRoom/leaveRoom/lockRoom/kickPlayer），Socket.IO 广播辅助（roomUpdated + roomsListUpdated），socket↔room 反向索引（断线清理），房主转移与空房间自动销毁
+- 房间 Socket 事件处理器 `server/game/rooms/handlers.ts`：接入 `server/plugins/socket.io.ts`，为已认证 socket 绑定 6 个通用房间事件（createRoom/joinRoom/leaveRoom/lockRoom/kickPlayer/getRoomsList），未认证请求通过 `serverError` 拒绝
+- 房间 REST API：`GET /api/rooms`（列表，要求 JWT）、`GET /api/rooms/:id`（详情，要求 JWT），未认证返回 401、房间不存在返回 404
+- 共享错误类型扩展 `shared/types/api/errors.ts`：新增 `errorLocked` / `errorAlreadyInRoom` / `errorNotInRoom` / `errorNotLeader` 四种房间错误码以及 `RoomError` 联合类型
+- 服务端 REST 鉴权助手 `server/utils/auth.ts` 新增 `getAuthPayload(event)`：从 `Authorization: Bearer <token>` 头或 `auth-token` cookie 提取并验证 JWT
+- 房间服务单元测试 `tests/game/rooms.test.ts`（17 用例）：覆盖 createRoom/joinRoom/leaveRoom/lockRoom/kickPlayer 全部路径与错误码，包括房主转移、空房间销毁、socket 反向索引
+- 房间 REST 测试 `tests/api/rooms.test.ts`（6 用例）：覆盖列表与详情的鉴权（401）、空列表、404、完整状态返回
+
+### 变更
+
+- `server/plugins/socket.io.ts`：认证成功后 `socket.data.userId` 缓存 userId，并加入 `lobby` 通道（用于 `roomsListUpdated` 广播）；`disconnect` 事件触发 `forceLeaveRoom`（通过 `rooms.getSocketRoomId` 查反向索引，避免内存中残留已断线玩家）
+- `app/pages/room.vue`：
+  - `initRoom` 加 `null` 守卫（`emitWithAck` 超时返回 `null` 时 `typeof null === 'object'` 会让 `'error' in null` 抛错）
+  - `getErrorText` 错误码映射改为 `errorNotFound` / `errorLocked` / `errorAlreadyInRoom` / `errorNotInRoom` / `errorNotLeader`，匹配新错误类型
+
+### 修复
+
+- Socket 断开后玩家残留导致房间无法正常销毁的隐患：原 `disconnect` handler 仅打日志；改为根据 `socket.data.userId` 与 `socketRoom` 反向索引调用 `leaveRoom`，让房主转移 / 空房销毁逻辑正常触发
+
+### 已知限制
+
+- `createRoom` 事件未携带 `gameType` 参数（`CommonClientToServerEvents.createRoom` 签名仍为 `() => uuid`），服务端硬编码 `avalon`。待接入第二款游戏时升级事件类型
+- 房间状态仅存内存（`Map<uuid, TRoomState>`），服务重启后所有房间丢失。持久化推迟到 v0.4.x 游戏历史阶段
+- `app/pages/index.vue` 与 `app/pages/room.vue` 仍按旧字段名 `options` 读取 `TRoomInfo.config` / `TRoomState.config`（v0.0.6 已重命名），UI 字段迁移推迟到 v0.1.5
+
+---
+
 ## [0.1.3]
 
 ### 变更

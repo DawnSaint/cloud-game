@@ -7,6 +7,11 @@ import type { AvalonClientToServerEvents, AvalonServerToClientEvents } from './a
 export type {
   ISocketError,
   IRoomUnavailableError,
+  IRoomLockedError,
+  IRoomAlreadyInError,
+  IRoomNotInError,
+  IRoomNotLeaderError,
+  RoomError,
   ILoginError,
   IRegisterError,
   IUpdateEmailError,

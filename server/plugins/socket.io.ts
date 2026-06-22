@@ -4,6 +4,8 @@ import { Server } from 'socket.io'
 import { setIO } from '../utils/socket'
 import { verifyJWT } from '../utils/auth'
 import * as userService from '../db/user'
+import * as rooms from '../game/rooms'
+import { registerRoomHandlers } from '../game/rooms/handlers'
 
 const SOCKET_PORT = Number(process.env.SOCKET_PORT) || 3200
 
@@ -34,6 +36,8 @@ export default definePlugin(() => {
       if (payload) {
         userId = payload.userId
         socket.join(userId)
+        socket.data.userId = userId
+        socket.join('lobby')
       }
       else {
         socket.emit('renewJWT')
@@ -85,10 +89,22 @@ export default definePlugin(() => {
         const result = await userService.updateCredentials(userId!, password, 'password', newPassword)
         cb(result)
       })
+
+      registerRoomHandlers(io, socket)
     }
 
-    socket.on('disconnect', () => {
+    socket.on('disconnect', async () => {
       console.log('[Socket.IO] disconnected:', socket.id)
+      const roomId = rooms.getSocketRoomId(socket.id)
+      if (userId && roomId) {
+        try {
+          await rooms.leaveRoom(roomId, userId)
+        }
+        catch (err) {
+          console.error('[Socket.IO] force leaveRoom failed:', err)
+        }
+        rooms.clearSocketFromRoom(socket.id)
+      }
     })
   })
 
