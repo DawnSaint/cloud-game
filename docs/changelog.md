@@ -4,6 +4,33 @@
 
 ---
 
+## [0.1.5]
+
+### 新增
+
+- 独立登录/注册页 `app/pages/auth.vue`：从 `profile.vue` 拆出完整认证表单（登录/注册切换、下划线输入框、白色按钮、开发态快捷登录）；登录后自动跳转 `route.query.redirect` 或首页
+
+### 变更
+
+- `app/components/TabBar.vue`：液态玻璃悬浮工具栏重设计（iOS 26 Liquid Glass 风格）。底部全宽白底固定条改为左右留白 12px、底部 10px+`safe-area-inset-bottom` 的圆角悬浮胶囊（`border-radius: 28px`）；25% 白色透明底 + `backdrop-filter: blur(30px) saturate(180%)` + 双层外阴影 + `inset` 顶部高光 + 半透明细线边框，让背景（房间渐变 / 主页列表）在工具栏下方透出来、消除视觉割裂；激活态由文字色变蓝改为内嵌白色半透明药丸（`background: rgba(255,255,255,0.28)`）+ 字重 500→600，未激活文字改为带白描边阴影的 65% 深灰以保证在任意背景上可读；点击反馈改为 `transform: scale(0.94)`，所有过渡统一为 350ms
+- `app/app.vue`：`.app-page` 从 `height: calc(100% - 60px) + overflow: auto` 改为 `height: 100% + overflow-x: hidden; overflow-y: auto`；根容器（html / body / `#__nuxt`）统一 `overflow: hidden`，让滚动收敛在 `.app-page` 内，避免悬浮 TabBar 的 box-shadow 溢出引发文档级双滚动条；TabBar 改为条件渲染，根据 `route.name` 计算 `showTabBar`（`hiddenTabBarRoutes = new Set(['auth'])`），支持页面级隐藏工具栏（Nuxt 5 nightly 对 `definePageMeta({ meta: { ... } })` 自定义字段构建时不会完整合入 `route.meta`，改走路由名更可靠）
+- `app/pages/index.vue`：大厅样式重做 —— `.lobby` 改为 flex 居中布局；创建按钮加 `:disabled="isCreating"` 绑定、JS 层在 `createRoom` 入口新增 `if (isCreating) return` 防重复点击；按钮样式改为 `$primary → $accent` 渐变 + 12px 圆角 + 柔和阴影 + `scale(0.98)` 按压反馈 + 禁用态脉冲动画（`@keyframes pulse`）；底部 padding 改为 `calc(80px + env(safe-area-inset-bottom))` 避让悬浮 TabBar；未登录时创建房间重定向到 `/auth?redirect=/`
+- `app/pages/wiki.vue`、`app/pages/profile.vue`：底部 padding 统一加上 `calc(80px + env(safe-area-inset-bottom))`，避免最后一条内容被悬浮 TabBar 遮挡
+- `app/pages/profile.vue`：移除登录/注册表单（迁移至 `app/pages/auth.vue`），仅保留已登录视图（个人资料、统计、菜单）；未登录时通过 `definePageMeta` 页面级 middleware 在渲染前拦截重定向至 `/auth?redirect=/profile`；退出登录后跳转 `/auth`
+- `app/pages/auth.vue`：`LobbyLogo` 从 `.auth-container` 内移出为 `.auth-page` 的直接子元素，与主页 / 规则页保持一致的顶部定位（依赖根容器 `$spacing-header` 内边距）；`.auth-container` 仅包裹登录/注册表单，采用 flex 分层布局（`.auth-spacer` 锁住顶部空间、`.form-tabs` 固定位置、`.form-body` 在 tab 下方剩余空间内排布字段）
+- `app/middleware/auth.ts`：未认证重定向目标从 `/profile` 改为 `/auth`
+- `app/pages/room.vue`：房间销毁后的跳转从 `router.push({ name: 'profile' })` 改为 `router.push({ name: 'index' })`，匹配新增的 `auth` 页面结构
+- `tests/middleware/auth.test.ts`：未认证跳转断言从 `/profile` 同步更新为 `/auth`
+
+### 修复
+
+- 大厅房间列表渲染崩溃：`app/pages/index.vue` 模板误读 `game.options`（`TRoomInfo` 字段实际为 `config`），导致访问 `options.roles` 时抛 `TypeError: Cannot read properties of undefined (reading 'roles')`；同步将 `hasOptions` 参数类型从 `GameOptions` 改为 `TGameConfig`，并对 `config?.roles` 加可选链守卫
+- 房间页纵向滚动条：`app/pages/room.vue` 的 `.room` 从 `min-height: 100vh` 改为 `height: 100%`，加 `overflow: hidden`。100vh 永远高于父容器 `.app-page` 导致必出滚动条；改为与父容器等高，配合 `.action-buttons` 底部 `calc(80px + safe-area)` 避让悬浮 TabBar
+- `app/pages/profile.vue` 未登录时切到「我的」Tab 触发渲染崩溃（`TypeError: Cannot read properties of null (reading 'name')`，并级联报 `Cannot destructure property 'type' of 'vnode'` / `parentNode`）：原 `setup` 内的 `router.replace` 不能阻止当次渲染；改为 `definePageMeta` 页面级 middleware 在渲染前拦截重定向，并对模板根加 `v-if="store.profile"` 双保险
+- `app/pages/auth.vue`：登录/注册模式切换时整个表单上下跳动 —— 原 `.auth-container` 用 `justify-content: center` 居中整块表单，注册多一个确认密码字段导致整块（含 tab 标题）重新居中；改为 flex 分层布局：`.auth-spacer`（`flex: 0 0 22%`）锁住顶部空间、`.form-tabs`（`flex: 0 0 auto`）固定位置、`.form-body` 仅在 tab 下方剩余空间内排布字段
+
+---
+
 ## [0.1.4]
 
 ### 新增
@@ -31,7 +58,7 @@
 
 - `createRoom` 事件未携带 `gameType` 参数（`CommonClientToServerEvents.createRoom` 签名仍为 `() => uuid`），服务端硬编码 `avalon`。待接入第二款游戏时升级事件类型
 - 房间状态仅存内存（`Map<uuid, TRoomState>`），服务重启后所有房间丢失。持久化推迟到 v0.4.x 游戏历史阶段
-- `app/pages/index.vue` 与 `app/pages/room.vue` 仍按旧字段名 `options` 读取 `TRoomInfo.config` / `TRoomState.config`（v0.0.6 已重命名），UI 字段迁移推迟到 v0.1.5
+- `app/pages/room.vue` 仍按旧字段名 `options` 读取 `TRoomState.config`（v0.0.6 已重命名），UI 字段迁移推迟到 v0.1.5
 
 ---
 

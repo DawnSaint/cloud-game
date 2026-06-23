@@ -15,16 +15,16 @@ describe('auth 路由守卫', () => {
     mockStore.isLoggedIn = false
   })
 
-  it('未登录时应跳转到 /profile 并携带 redirect 参数', async () => {
+  it('未登录时应跳转到 /auth 并携带 redirect 参数', async () => {
     const { default: middleware } = await import('~/middleware/auth')
     const result = middleware({ fullPath: '/room' })
 
     expect(globalThis.navigateTo).toHaveBeenCalledWith({
-      path: '/profile',
+      path: '/auth',
       query: { redirect: '/room' },
     })
     expect(result).toEqual({
-      path: '/profile',
+      path: '/auth',
       query: { redirect: '/room' },
     })
   })
@@ -43,7 +43,7 @@ describe('auth 路由守卫', () => {
     middleware({ fullPath: '/room?id=abc123' })
 
     expect(globalThis.navigateTo).toHaveBeenCalledWith({
-      path: '/profile',
+      path: '/auth',
       query: { redirect: '/room?id=abc123' },
     })
   })

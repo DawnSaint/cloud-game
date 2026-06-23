@@ -4,7 +4,7 @@
     <LobbyLogo />
 
     <!-- 创建房间按钮 -->
-    <button class="create-room-btn" @click="createRoom">
+    <button class="create-room-btn" :disabled="isCreating" @click="createRoom">
       {{ isCreating ? '创建中...' : '创建房间' }}
     </button>
 
@@ -18,12 +18,12 @@
               <span v-if="game.result?.winner" :class="`${game.result.winner}-loyalty-icon`"/>
               <span class="host-name">{{ roomsListHosts[index] || '加载中...' }}</span>
             </div>
-            <div v-if="hasOptions(game.options)" class="options-preview">
+            <div v-if="hasOptions(game.config)" class="options-preview">
               <span class="option-text">配置: </span>
-              <span v-if="game.options.roles.merlin" class="option-badge">梅林 </span>
-              <span v-if="game.options.roles.percival" class="option-badge">派西维尔 </span>
-              <span v-if="game.options.roles.morgana" class="option-badge">莫甘娜 </span>
-              <span v-if="game.options.roles.mordred" class="option-badge">莫德雷德 </span>
+              <span v-if="game.config?.roles?.merlin" class="option-badge">梅林 </span>
+              <span v-if="game.config?.roles?.percival" class="option-badge">派西维尔 </span>
+              <span v-if="game.config?.roles?.morgana" class="option-badge">莫甘娜 </span>
+              <span v-if="game.config?.roles?.mordred" class="option-badge">莫德雷德 </span>
             </div>
           </div>
           <div class="game-right">
@@ -45,7 +45,7 @@ import { useRouter } from 'vue-router';
 import LobbyLogo from '~/components/LobbyLogo.vue';
 import { useMainStore } from '~/stores/main';
 import { socket } from '~/composables/useSocket';
-import type { TRoomsList, GameOptions } from '~/types';
+import type { TRoomsList, TGameConfig } from '~/types';
 import { showToast, showModal } from '~/composables/useUI';
 
 const store = useMainStore();
@@ -78,13 +78,16 @@ const initState = async () => {
 
 // 创建房间
 const createRoom = async () => {
+  if (isCreating.value) {
+    return;
+  }
   if (!store.profile) {
     showModal({
       title: '提示',
       content: '请先登录后再创建房间',
       showCancel: false,
     });
-    router.push({ name: 'profile' });
+    router.push({ path: '/auth', query: { redirect: '/' } });
     return;
   }
 
@@ -119,8 +122,8 @@ const handleRoomClick = (uuid: string) => {
 };
 
 // 检查是否有配置选项
-const hasOptions = (options: GameOptions) => {
-  return Object.values(options.roles).some((el) => Boolean(el));
+const hasOptions = (options?: TGameConfig) => {
+  return Object.values(options?.roles ?? {}).some((el) => Boolean(el));
 };
 
 // 房间列表更新监听
@@ -144,30 +147,51 @@ onUnmounted(() => {
 <style scoped lang="scss">
 .lobby {
   box-sizing: border-box;
-  padding: $spacing-header $spacing-lg;
+  padding: $spacing-header $spacing-lg calc(80px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .create-room-btn {
-  margin: 36vh $spacing-xxxl 0;
+  margin-top: 36vh;
+  width: 100%;
+  max-width: 360px;
+  padding: $spacing-lg $spacing-xxl;
+  min-height: 52px;
   color: $text-white;
-  background-color: $accent;
+  background: linear-gradient(135deg, $primary 0%, $accent 100%);
   font-size: $font-xl;
-  border: none;
   font-weight: 600;
-  transition: opacity $transition-normal;
+  letter-spacing: 0.5px;
+  border: none;
+  border-radius: $radius-xlarge;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba($primary, 0.25);
+  transition:
+    transform $transition-fast,
+    box-shadow $transition-fast,
+    opacity $transition-fast;
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+    box-shadow: 0 2px 6px rgba($primary, 0.3);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.75;
+    animation: pulse 1.4s ease-in-out infinite;
+  }
 }
 
-.create-room-btn:active {
-  opacity: 0.6;
-}
-
-.create-room-btn[disabled] {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background-color: $primary;
+@keyframes pulse {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 0.55; }
 }
 
 .rooms-list {
+  width: 100%;
   margin-top: $spacing-xxl;
 }
 

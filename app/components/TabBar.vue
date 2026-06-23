@@ -26,7 +26,8 @@ const tabs = [
 ];
 
 const activeTab = computed(() => {
-  return (route.meta.tab as string) || 'index';
+  const match = tabs.find((t) => t.path === route.path);
+  return match?.key || 'index';
 });
 
 const handleTabClick = (key: string) => {

@@ -1,16 +1,21 @@
 <template>
   <NuxtPage class="app-page" />
-  <TabBar />
+  <TabBar v-if="showTabBar" />
   <UIOverlay />
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useMainStore } from '~/stores/main'
 import TabBar from '~/components/TabBar.vue'
 import UIOverlay from '~/components/UIOverlay.vue'
 
+const route = useRoute()
 const store = useMainStore()
+
+const hiddenTabBarRoutes = new Set(['auth'])
+const showTabBar = computed(() => !hiddenTabBarRoutes.has(String(route.name)))
 
 onMounted(() => {
   if (store.profile) {
@@ -33,12 +38,12 @@ onUnmounted(() => {
 }
 
 html,
-body,
-#__nuxt {
+body {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
+  overflow: hidden;
   background-color: $bg;
   box-sizing: border-box;
   font-family:
@@ -46,12 +51,22 @@ body,
     'Helvetica Neue', sans-serif;
 }
 
+#__nuxt {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
 .app-page {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: calc(100% - 60px); // Adjust for TabBar height
-  overflow: auto;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 </style>

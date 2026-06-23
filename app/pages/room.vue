@@ -300,7 +300,7 @@ const handleDestroyRoom = (gameUUID: string) => {
       duration: 2000,
     });
     setTimeout(() => {
-      router.push({ name: 'profile' });
+      router.push({ name: 'index' });
     }, 2000);
   }
 };
@@ -512,9 +512,10 @@ const handleMissionAction = (result: TMissionResult) => {
 <style scoped lang="scss">
 .room {
   padding-top: $spacing-header;
-  min-height: 100vh;
+  height: 100%;
   box-sizing: border-box;
   background: linear-gradient(135deg, #355f96 0%, #34495e 35%, #533483 60%, #8b1a1a 100%);
+  overflow: hidden;
 }
 
 .error-container {
@@ -673,7 +674,7 @@ const handleMissionAction = (result: TMissionResult) => {
 .action-buttons {
   display: flex;
   gap: 12px;
-  padding: 20px 10px;
+  padding: 20px 10px calc(80px + env(safe-area-inset-bottom, 0px));
   justify-content: center;
 }
 

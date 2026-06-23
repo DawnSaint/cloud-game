@@ -5,7 +5,7 @@ export default defineNuxtRouteMiddleware((to) => {
 
   if (!store.isLoggedIn) {
     return navigateTo({
-      path: '/profile',
+      path: '/auth',
       query: { redirect: to.fullPath },
     })
   }

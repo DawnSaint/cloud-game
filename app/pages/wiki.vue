@@ -637,7 +637,7 @@ const toggleSection = (key: string) => {
 }
 
 .wiki-container {
-  padding: $spacing-header $spacing-lg 0;
+  padding: $spacing-header $spacing-lg calc(80px + env(safe-area-inset-bottom, 0px));
   position: relative;
 }
 
