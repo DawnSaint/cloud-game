@@ -12,18 +12,26 @@
 - [x] 通用房间 Socket 事件 — createRoom、joinRoom、leaveRoom、kickPlayer、lockRoom
 - [x] 房间状态广播 — roomUpdated 事件推送完整房间状态，玩家加入/离开/踢出实时同步
 - [x] 大厅房间列表 — 在线房间列表、实时刷新、移动端列表 UI
-- [ ] 创建房间流程 — 选择游戏类型 → 创建 → 跳转房间页（v0.1.4 硬编码 avalon，多游戏选择推迟到接入第二款游戏时）
 - [x] 房间内通用 UI — 玩家列表、房主控制（踢人/锁房）、加入/离开按钮
 - [x] 房间生命周期管理 — 所有人离开自动销毁、房主离开转移权限
 
 ---
 
-## v0.2.x — Avalon 游戏引擎
+## v0.1.6 — Avalon 引擎基座（提前启动 Avalon 游戏引擎）
+
+从 Avalon 游戏引擎阶段提前抽取最底层的两块：游戏引擎契约 + Avalon 角色分配。为后续回合状态机打地基，本身不接入 startGame 流程（留待下一阶段）。
+
+- [x] Game Registry 框架 — `TGameEngine` 接口（gameType / minPlayers / maxPlayers / createGame）、游戏注册表（registerGame / getGameEngine / getAvailableGameTypes）、服务端启动时挂载
+- [x] Avalon 引擎骨架 — 游戏初始化、角色分配（梅林 / 忠臣 / 爪牙 / 莫甘娜 / 派西维尔）、首夜可见性计算（visibility map）
+
+---
+
+## Avalon 游戏引擎
 
 实现 Avalon 服务端游戏引擎核心，支持角色分配和完整回合流转。
 
-- [ ] Game Registry 框架 — TGameEngine 接口、游戏注册表、事件路由分发
-- [ ] Avalon 引擎骨架 — 游戏初始化、角色分配（梅林/忠臣/爪牙/莫甘娜/派西维尔）
+- [x] Game Registry 框架 — TGameEngine 接口、游戏注册表、事件路由分发（v0.1.6 已实现契约与注册；事件路由分发待游戏事件落地后补齐）
+- [x] Avalon 引擎骨架 — 游戏初始化、角色分配（梅林/忠臣/爪牙/莫甘娜/派西维尔）（v0.1.6 已实现）
 - [ ] 回合状态机 — initialization → selectTeam → votingForTeam → onMission → 循环/结束
 - [ ] 游戏启动流程 — startGame → 角色分配 → 首夜信息 → 第一轮 selectTeam
 - [ ] 前端游戏面板加载 — 按 gameType 动态加载 Avalon 组件
@@ -31,7 +39,7 @@
 
 ---
 
-## v0.3.x — Avalon 核心玩法
+## Avalon 核心玩法
 
 实现完整回合制玩法，Avalon 可玩。
 
@@ -44,7 +52,7 @@
 
 ---
 
-## v0.4.x — Avalon 体验完善
+## Avalon 体验完善
 
 补齐游戏体验，提升可玩性和稳定性。
 
@@ -57,7 +65,7 @@
 
 ---
 
-## v0.5.x — 测试与质量保证
+## 测试与质量保证
 
 全面测试覆盖，修复已知问题，为首版发布做质量关卡。
 
@@ -72,6 +80,7 @@
 
 ## 后续扩展
 
+- [ ] 创建房间流程 — 选择游戏类型 → 创建 → 跳转房间页
 - [ ] 接入第二款游戏（验证多游戏架构）
 
 

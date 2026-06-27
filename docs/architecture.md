@@ -123,16 +123,27 @@ cloud-game/
 
 #### 游戏注册表（Game Registry）
 
-服务端 `server/game/registry.ts` 维护 gameType → GameEngine 映射。`TGameEngine` 接口：
+服务端 `server/game/registry.ts` 维护 gameType → GameEngine 映射（`registerGame` / `getGameEngine` / `getAvailableGameTypes`）。`TGameEngine` 接口按版本分阶段实现：
 
-- `gameType: string` — 游戏标识
-- `minPlayers / maxPlayers` — 人数范围
-- `validateConfig(config): boolean` — 校验游戏配置
-- `createGame(roomId, players, config): GameState` — 初始化游戏
-- `handleEvent(state, event, payload): GameState` — 游戏事件统一入口
-- `getVisualState(state, playerId): VisualGameState` — 按玩家视角裁剪状态
+- `gameType: TGameType` — 游戏标识（v0.1.6 ✅）
+- `minPlayers / maxPlayers` — 人数范围（v0.1.6 ✅）
+- `createGame(roomId, players, config): TGameCreateResult` — 初始化游戏，返回权威 `AvalonGameState` + 首夜可见性 map（v0.1.6 ✅）
+- `validateConfig(config): boolean` — 校验游戏配置（待补：当前由 `createGame` 内部抛 `InvalidGameConfigError`）
+- `handleEvent(state, event, payload): GameState` — 游戏事件统一入口（待补：随回合状态机 / 游戏事件落地）
+- `getVisualState(state, playerId): VisualGameState` — 按玩家视角裁剪状态（待补：随角色揭示 UI 落地）
 
-接入新游戏只需实现 `TGameEngine` 接口并注册到 registry。
+`server/plugins/games.ts` 在服务端启动时导入各游戏包触发注册副作用。接入新游戏只需实现 `TGameEngine` 接口并在游戏包 `index.ts` 中 `registerGame`。
+
+#### Avalon 引擎骨架（v0.1.6）
+
+`server/game/avalon/` 实现 v0.1.6 的初始化表面：
+
+- `roles.ts` — 角色数据表（忠诚 + 可见性），替代上游 `Character` 类层级；v0.1.6 仅 5 核心角色，其余占位并在 `assignRoles` 中拒绝
+- `presets.ts` — 5–10 人预设（任务规模 + 阵营名额）
+- `role-assignment.ts` — 纯函数 `assignRoles`（人数校验 → 消费特殊角色 → 阵营补位 → Fisher-Yates 洗牌）+ `computeVisibility`（首夜可见性）
+- `engine.ts` — `avalonEngine.createGame` 产出 `stage: 'initialization'` 的权威状态（真实角色，服务端保密）+ visibility map
+
+权威 `AvalonGameState.players[].role` 为真实角色（保密）；按玩家视角的裁剪依赖后续 `getVisualState`。
 
 #### 房间数据层（v0.1.4）
 

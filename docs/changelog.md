@@ -4,6 +4,29 @@
 
 ---
 
+## [0.1.6]
+
+### 新增
+
+- Game Registry 框架 `server/game/registry.ts`：`TGameEngine` 接口（`gameType` / `minPlayers` / `maxPlayers` / `createGame`）、`TGameCreateResult`（权威状态 + 首夜可见性）、注册表三件套（`registerGame` / `getGameEngine` / `getAvailableGameTypes`）。`handleEvent` / `getVisualState` 等回合方法留待游戏事件与角色揭示 UI 落地后再补，避免为尚不存在的事件做路由
+- Avalon 引擎骨架 `server/game/avalon/`：
+  - `roles.ts` — v0.1.6 五个核心角色（梅林 / 派西维尔 / 忠臣 / 莫甘娜 / 爪牙）的数据表（忠诚 + 可见性），替代上游 `Character` 类层级；其余角色占位以满足 `Record<TRoles>` 索引，`assignRoles` 命中时拒绝
+  - `presets.ts` — 5–10 人预设（任务规模 + 好人/邪恶名额），自 `_reference` 移植；`MIN_PLAYERS` / `MAX_PLAYERS`
+  - `role-assignment.ts` — 纯函数 `assignRoles`（校验人数 → 消费特殊角色 → 阵营补位 → Fisher-Yates 洗牌，无 lodash 依赖）、`computeVisibility`（首夜可见性 map）、`calculateRolesForView`（按 importance 排序）、`InvalidGameConfigError`
+  - `engine.ts` — `avalonEngine` 实现 `TGameEngine.createGame`：产出 `stage: 'initialization'` 的权威 `AvalonGameState`（真实角色，服务端保密）+ visibility map（驱动按玩家视角裁剪）
+  - `index.ts` — barrel + 向注册表注册 Avalon
+- 服务端启动插件 `server/plugins/games.ts`：导入 Avalon 引擎触发注册副作用，启动时打印已注册游戏列表
+- 单元测试 `tests/game/avalon/role-assignment.test.ts`（17 用例）：5–10 人配置、阵营补位、不支持角色拒绝、count>1 截断、importance 排序、预设一致性、随机性分布、首夜可见性规则（梅林/派西维尔/忠臣/邪恶方互见/自身）
+- 单元测试 `tests/game/avalon/engine.test.ts`（7 用例）：注册表查询、引擎元信息、`createGame` 状态构成、visibility 中梅林见邪恶方、人数越界抛错
+
+### 已知限制
+
+- 引擎仅实现初始化（角色分配 + 首夜信息），未接入 `startGame` 房间流程，未实现回合状态机 —— 均留待 Avalon 游戏引擎后续条目
+- `TGameEngine` 接口暂不含 `handleEvent` / `getVisualState`，待游戏事件与角色揭示 UI 落地后补齐
+- `AvalonGameState.players[].role` 为服务端权威真实角色（保密），按玩家视角的状态裁剪尚未实现（依赖 `getVisualState`，后续版本）
+
+---
+
 ## [0.1.5]
 
 ### 新增
