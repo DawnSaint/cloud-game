@@ -36,12 +36,21 @@ describe('avalonEngine.createGame', () => {
     })
 
     expect(state.uuid).toBe(roomId)
-    expect(state.stage).toBe('initialization')
+    // v0.1.7: round state machine initializes inside createGame, so the
+    // authoritative state is already in 'selectTeam' (first leader waiting).
+    expect(state.stage).toBe('selectTeam')
     expect(state.vote).toBe(0)
     expect(state.mission).toBe(0)
     expect(state.history).toEqual([])
     expect(state.missionState).toHaveLength(5)
     expect(state.players).toHaveLength(5)
+    // Runtime fields are seeded for the round state machine.
+    expect(state.leaderID).toMatch(/^p[1-5]$/)
+    expect(state.currentTeam).toEqual([])
+    expect(state.currentVotes).toEqual({})
+    expect(state.currentActions).toEqual({})
+    expect(state.players.find(p => p.id === state.leaderID)!.features.isLeader).toBe(true)
+    expect(state.players.find(p => p.id === state.leaderID)!.features.waitForAction).toBe(true)
 
     // 每个玩家拿到 v0.1.6 支持集合内的角色
     for (const p of state.players) {

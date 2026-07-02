@@ -4,6 +4,26 @@
 
 ---
 
+## [0.1.7]
+
+### 新增
+
+- Avalon 回合状态机 `server/game/avalon/state-machine.ts`：纯函数 `applyEvent` 覆盖 `selectPlayer` / `submitTeam` / `castVote` / `missionAction` 四类事件，按 `initialization → selectTeam → votingForTeam → onMission` 流转并支持循环 / 结束。胜负判定内置三条规则：连续 3 次任务成功 → `goodTeamMissions` 好人胜、连续 3 次任务失败 → `evilTeamMissions` 邪恶胜、连续 5 次投票拒绝 → `rejectedVote` 邪恶胜。队长轮换（拒绝后 + 任务完成后）写入 `state.leaderID`。`PlayerFeatures` 镜像当前阶段的高亮状态（`isLeader` / `isSelected` / `isSent` / `waitForAction`）便于 UI 渲染
+- 共享事件类型 `shared/types/games/avalon/events.ts`：`TAvalonEvent`（`type` 判别联合）+ `TAvalonEventResult`（`{ state } | { error }`）+ `AVALON_ACTIVE_STAGES` 常量，给后续 Socket 路由分发做准备
+- `AvalonGameState` 扩展运行时字段：`leaderID` / `currentTeam` / `currentVotes` / `currentActions`；服务端权威状态保留真实角色，前端可见切片由 `getVisualState` 按首夜可见性 map 脱敏，`stage === 'end'` 时全量揭示
+- `TGameEngine` 接口新增 `handleEvent(state, event, actorId)` 与 `getVisualState(state, inputs)` 两个方法；`avalonEngine` 同步实现 —— 当前以 Avalon 具体类型承载，待接入第二款游戏时再泛型化为 `<TState, TEvent>`
+- `createGame` 现在内置「随机选首位队长 + 立即进入 selectTeam」两步，`PlayerFeatures` 同步点亮；首个 leader 通过纯随机数选取，后续回合才走队长轮换逻辑
+- 状态机单元测试 `tests/game/avalon/state-machine.test.ts`（38 用例）：覆盖 `selectPlayer` / `submitTeam` / `castVote` / `missionAction` 全部边界（队长权限、阶段守卫、未知玩家、重复投票、重复任务卡、tally 平票）、3-success / 3-fail / 5-reject 三种胜利条件、队长轮换（含 wrap-around）、history 记录完整性、`getVisualState` 角色脱敏与 end 揭示
+- `tests/game/avalon/engine.test.ts` 同步更新：期望 `createGame` 产出 `stage: 'selectTeam'`（状态机已就绪），并断言 `leaderID` / `currentTeam` / `currentVotes` / `currentActions` 四个运行时字段被正确初始化
+
+### 已知限制
+
+- 回合状态机只覆盖 `selectTeam` / `votingForTeam` / `onMission` 三段；尚未接入房间层（`startGame` Socket 路由、角色揭示 UI、游戏面板挂载）—— 均留待 Avalon 游戏引擎后续条目
+- `TGameEngine.handleEvent` / `getVisualState` 当前以 Avalon 具体类型承载；接入第二款游戏前需泛型化
+- `stage` 类型仍保留 `'initialization'` / `'hidden'` / `'assassinate'` 等历史阶段；运行时实际只会进入 `selectTeam` / `votingForTeam` / `onMission` / `end` 四种，留待以后按需清理
+
+---
+
 ## [0.1.6]
 
 ### 新增

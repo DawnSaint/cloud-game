@@ -19,6 +19,8 @@ export type { TVoteOption, TeamMember, PreVoteData } from './vote';
 export type { GameOptionsRoles, AvalonGameConfig, GameOptions } from './options';
 export type { PlayersSettings, GameRoles, GameSettings, GameSettingsWithRoles } from './settings';
 export type { AvalonGameState, VisualGameState, GameResults, TGameStage, TGameEndReasons } from './state';
+export type { TAvalonEvent, TAvalonEventResult, TAvalonVisualInputs } from './events';
+export { AVALON_ACTIVE_STAGES } from './events';
 export type { TAssassinateType, TAssassinateResult, AssassinAddonData, AssassinateProgressData } from './addons';
 
 export type {

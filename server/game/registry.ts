@@ -1,6 +1,7 @@
-import type { TGameType, TGameConfig } from '../../shared/types/common/game'
+﻿import type { TGameType, TGameConfig } from '../../shared/types/common/game'
 import type { RoomPlayer } from '../../shared/types/common/room'
 import type { AvalonGameState } from '../../shared/types/games/avalon/state'
+import type { TAvalonEvent, TAvalonEventResult } from '../../shared/types/games/avalon/events'
 import type { TVisibleRole } from '../../shared/types/games/avalon/roles'
 
 /**
@@ -16,11 +17,25 @@ export interface TGameCreateResult {
 }
 
 /**
+ * Inputs to `TGameEngine.getVisualState`. v0.1.7 passes the first-night
+ * visibility map through unchanged; future add-on roles may need richer
+ * context (mid-game reveals), which can extend this interface then.
+ */
+export interface TGameVisualInputs {
+  playerId: string
+  visibility: TVisibilityMap
+}
+
+/**
  * Contract every game engine implements.
  *
- * v0.1.6 ships the initialization surface (gameType / player range / createGame).
- * Turn-based methods (`handleEvent`, `getVisualState`) are added in later versions
- * as game events and the role-reveal UI land — see docs/roadmap.md.
+ * v0.1.6 shipped initialization (`createGame`). v0.1.7 adds the round
+ * state-machine surface (`handleEvent` / `getVisualState`) so the engine
+ * is ready to be plugged into the Socket.IO dispatcher when `startGame`
+ * lands in the next milestone — see `docs/roadmap.md`.
+ *
+ * Concrete types are used for now; when a second game ships we'll genericize
+ * via `<TState, TEvent>` so each engine can keep its own state shape.
  */
 export interface TGameEngine {
   /** Game identifier; matches a `TGameType`. */
@@ -34,6 +49,18 @@ export interface TGameEngine {
    * Throws on invalid player count or impossible role configuration.
    */
   createGame(roomId: string, players: RoomPlayer[], config: TGameConfig): TGameCreateResult
+  /**
+   * Apply a game event to the authoritative state. Returns either the new
+   * immutable state or a validation error code (no throw on validator
+   * failures so the dispatcher can surface it to the caller without try/catch).
+   */
+  handleEvent(state: AvalonGameState, event: TAvalonEvent, actorId: string): TAvalonEventResult
+  /**
+   * Build the per-observer state slice. During play, server-secret roles are
+   * replaced by visibility-map entries (or 'unknown'); after stage is 'end'
+   * all roles reveal.
+   */
+  getVisualState(state: AvalonGameState, inputs: TGameVisualInputs): AvalonGameState
 }
 
 const engines = new Map<TGameType, TGameEngine>()

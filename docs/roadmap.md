@@ -1,4 +1,4 @@
-# Cloud Game 项目路线图
+﻿# Cloud Game 项目路线图
 
 > 云游戏平台开发规划，以多游戏架构为基座，Avalon Online 为首款验证游戏。移动端优先。
 
@@ -32,7 +32,7 @@
 
 - [x] Game Registry 框架 — TGameEngine 接口、游戏注册表、事件路由分发（v0.1.6 已实现契约与注册；事件路由分发待游戏事件落地后补齐）
 - [x] Avalon 引擎骨架 — 游戏初始化、角色分配（梅林/忠臣/爪牙/莫甘娜/派西维尔）（v0.1.6 已实现）
-- [ ] 回合状态机 — initialization → selectTeam → votingForTeam → onMission → 循环/结束
+- [x] 回合状态机 — initialization → selectTeam → votingForTeam → onMission → 循环/结束
 - [ ] 游戏启动流程 — startGame → 角色分配 → 首夜信息 → 第一轮 selectTeam
 - [ ] 前端游戏面板加载 — 按 gameType 动态加载 Avalon 组件
 - [ ] 角色揭示 — 首夜角色展示、梅林/派西维尔信息展示

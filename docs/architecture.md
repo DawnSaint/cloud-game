@@ -1,4 +1,4 @@
-# Cloud Game 架构文档
+﻿# Cloud Game 架构文档
 
 > 技术架构、设计决策与开发规范。
 
@@ -129,8 +129,8 @@ cloud-game/
 - `minPlayers / maxPlayers` — 人数范围（v0.1.6 ✅）
 - `createGame(roomId, players, config): TGameCreateResult` — 初始化游戏，返回权威 `AvalonGameState` + 首夜可见性 map（v0.1.6 ✅）
 - `validateConfig(config): boolean` — 校验游戏配置（待补：当前由 `createGame` 内部抛 `InvalidGameConfigError`）
-- `handleEvent(state, event, payload): GameState` — 游戏事件统一入口（待补：随回合状态机 / 游戏事件落地）
-- `getVisualState(state, playerId): VisualGameState` — 按玩家视角裁剪状态（待补：随角色揭示 UI 落地）
+- `handleEvent(state, event, actorId): TAvalonEventResult` — 游戏事件统一入口（v0.1.7 ✅，回合状态机已落地）
+- `getVisualState(state, inputs): AvalonGameState` — 按玩家视角裁剪状态（v0.1.7 ✅，运行时脱敏 + end 揭示）
 
 `server/plugins/games.ts` 在服务端启动时导入各游戏包触发注册副作用。接入新游戏只需实现 `TGameEngine` 接口并在游戏包 `index.ts` 中 `registerGame`。
 
@@ -144,6 +144,22 @@ cloud-game/
 - `engine.ts` — `avalonEngine.createGame` 产出 `stage: 'initialization'` 的权威状态（真实角色，服务端保密）+ visibility map
 
 权威 `AvalonGameState.players[].role` 为真实角色（保密）；按玩家视角的裁剪依赖后续 `getVisualState`。
+
+#### Avalon 回合状态机（v0.1.7）
+
+`server/game/avalon/state-machine.ts` 在 v0.1.6 的初始化基础上补齐回合流转，规则对齐 Roadmap 中「核心玩法」三条胜利条件：
+
+- **状态字段**：`AvalonGameState` 新增四个运行时字段 `leaderID` / `currentTeam` / `currentVotes` / `currentActions`，作为服务端权威当前回合状态；`PlayerFeatures` 由引擎镜像（`isLeader` / `isSelected` / `isSent` / `waitForAction`）便于 UI 渲染
+- **阶段流转**：`createGame` 结束后立即进入 `selectTeam`，按回合走 `selectTeam → votingForTeam → onMission → selectTeam` 循环；拒绝投票或任务完成都会把 `leaderID` 轮换到下一位（座位顺序首尾相接）
+- **事件入口**：`avalonEngine.handleEvent` 接收 `TAvalonEvent`（`selectPlayer` / `submitTeam` / `castVote` / `missionAction`）+ `actorId`，返回 `{ state }` 或 `{ error }`；`applyEvent` 内部委托给 `applySelectPlayer` / `applySubmitTeam` / `applyCastVote` / `applyMissionAction` 四个纯函数，便于测试
+- **胜负判定**：
+  - 任务结果按 `missionState[i].failsRequired` 阈值计算，`fails >= failsRequired` 即判负
+  - 累计 3 次 success → `stage: 'end'`、`reason: 'goodTeamMissions'`、`winner: 'good'`
+  - 累计 3 次 fail → `stage: 'end'`、`reason: 'evilTeamMissions'`、`winner: 'evil'`
+  - 单个任务内连续 5 次 reject（`state.vote` 累加到 5）→ `stage: 'end'`、`reason: 'rejectedVote'`、`winner: 'evil'`；任务成功进入下一关时 `vote` 重置为 0
+- **历史记录**：每次投票 / 任务结束分别 push 一条 `HistoryVote` / `HistoryMission` 到 `state.history`，与上游 `THistoryResults` 联合类型兼容；后续 UI 直接消费，无需再走服务端二次查询
+- **角色揭示**：`getVisualState(state, { playerId, visibility })` 在非 end 阶段按首夜可见性 map 切片；`stage === 'end'` 时全员揭示。状态机本身与 visibility 解耦 —— 状态机只产权威状态，广播前的脱敏交给 dispatcher / 客户端
+
 
 #### 房间数据层（v0.1.4）
 
@@ -212,3 +228,4 @@ interface TRoomDoc {
 ## 已知技术债务
 
 （项目初期，暂无）
+
