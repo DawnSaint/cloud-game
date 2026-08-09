@@ -62,12 +62,17 @@ function withFlags(state: AvalonGameState): AvalonGameState {
 function computeFeatures(state: AvalonGameState): Record<string, Player['features']> {
   const selected = new Set(state.currentTeam)
   const waiting = waitingPlayerIds(state)
+  // 刺客：邪恶方中第一个非特殊角色（minion）担任刺客；用于刺杀阶段标识。
+  const assassinId = state.stage === 'assassinate'
+    ? state.players.find(p => p.loyalty === 'evil' && p.role === 'minion')?.id
+    : undefined
   const out: Record<string, Player['features']> = {}
   for (const p of state.players) {
     out[p.id] = {
       isLeader: p.id === state.leaderID,
       isSelected: selected.has(p.id),
       isSent: state.stage === 'onMission' && selected.has(p.id),
+      isAssassin: p.id === assassinId,
       waitForAction: waiting.has(p.id),
     }
   }
@@ -83,6 +88,11 @@ function waitingPlayerIds(state: AvalonGameState): Set<string> {
   }
   if (state.stage === 'onMission') {
     return new Set(state.currentTeam.filter(id => !(id in state.currentActions)))
+  }
+  if (state.stage === 'assassinate') {
+    // 刺客行动：只有刺客本人需要操作。
+    const assassin = state.players.find(p => p.features.isAssassin)
+    return assassin ? new Set([assassin.id]) : new Set()
   }
   return new Set()
 }
@@ -223,7 +233,8 @@ export function applyMissionAction(
 
   const wins = countWins(nextMissionState)
   if (missionResult === 'success' && wins.success >= WINS_REQUIRED) {
-    return { state: endGame(withFlags({ ...state, missionState: nextMissionState, history, currentActions: {} }), 'goodTeamMissions') }
+    // 好人方完成 3 个任务 → 进入刺杀阶段（刺客尝试刺杀梅林）。
+    return { state: enterAssassinate(withFlags({ ...state, missionState: nextMissionState, history, currentActions: {} })) }
   }
   if (missionResult === 'fail' && wins.fail >= WINS_REQUIRED) {
     return { state: endGame(withFlags({ ...state, missionState: nextMissionState, history, currentActions: {} }), 'evilTeamMissions') }
@@ -256,9 +267,18 @@ function enterMission(state: AvalonGameState): AvalonGameState {
   return withFlags({ ...state, stage: 'onMission', currentActions: {} })
 }
 
+/**
+ * Transition to the assassination stage. The assassin is the evil player
+ * holding the `assassin` role feature (minion by default). Evil wins only
+ * if they correctly identify Merlin.
+ */
+function enterAssassinate(state: AvalonGameState): AvalonGameState {
+  return withFlags({ ...state, stage: 'assassinate' })
+}
+
 function endGame(state: AvalonGameState, reason: GameResults['reason']): AvalonGameState {
-  const winner = reason === 'goodTeamMissions' ? 'good'
-    : reason === 'evilTeamMissions' || reason === 'rejectedVote' ? 'evil'
+  const winner = reason === 'goodTeamMissions' || reason === 'missMerlin' ? 'good'
+    : reason === 'evilTeamMissions' || reason === 'rejectedVote' || reason === 'killMerlin' ? 'evil'
       : undefined
   return withFlags({
     ...state,
@@ -340,10 +360,40 @@ function countWins(missionState: MissionWithResult[]): { success: number, fail: 
   return { success, fail }
 }
 
+/**
+ * Assassination phase: the assassin (the player flagged `isAssassin`) picks
+ * a target. If the target is Merlin, evil wins (`killMerlin`); otherwise
+ * good wins (`missMerlin`). Only valid in the `assassinate` stage.
+ */
+export function applyAssassinate(
+  state: AvalonGameState,
+  actorId: string,
+  targetId: string,
+): TAvalonEventResult {
+  if (state.stage !== 'assassinate') {
+    return { error: `assassinate only valid in assassinate (current: ${state.stage})` }
+  }
+  const assassin = state.players.find(p => p.features.isAssassin)
+  if (!assassin || assassin.id !== actorId) {
+    return { error: 'only the assassin may assassinate' }
+  }
+  if (!state.players.some(p => p.id === targetId)) {
+    return { error: `unknown player: ${targetId}` }
+  }
+  const target = state.players.find(p => p.id === targetId)!
+  const killedMerlin = target.role === 'merlin'
+  return {
+    state: endGame(
+      withFlags({ ...state, currentTeam: [], currentVotes: {}, currentActions: {} }),
+      killedMerlin ? 'killMerlin' : 'missMerlin',
+    ),
+  }
+}
+
 /** ---------- Event dispatcher ---------- */
 
 /**
- * Apply any v0.1.7 Avalon event. Each branch validates the current stage
+ * Apply any Avalon event. Each branch validates the current stage
  * and actor eligibility before delegating to the pure helper above.
  */
 export function applyEvent(
@@ -360,5 +410,7 @@ export function applyEvent(
       return applyCastVote(state, actorId, event.option)
     case 'missionAction':
       return applyMissionAction(state, actorId, event.result)
+    case 'assassinate':
+      return applyAssassinate(state, actorId, event.targetId)
   }
 }

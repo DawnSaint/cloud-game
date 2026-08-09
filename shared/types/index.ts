@@ -83,6 +83,10 @@ export type {
   IRoomAlreadyInError,
   IRoomNotInError,
   IRoomNotLeaderError,
+  IRoomNotStartedError,
+  IGameNotFoundError,
+  IEngineNotFoundError,
+  IPlayerCountError,
   RoomError,
   ILoginError,
   IRegisterError,
@@ -92,3 +96,6 @@ export type {
   IUpdateAvatarError,
   ArgumentOfCallback,
 } from './api/socket-events';
+
+// Avalon 游戏事件类型（服务端处理器使用）
+export type { TAvalonEvent, TAvalonEventResult } from './games/avalon/events';

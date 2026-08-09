@@ -72,6 +72,14 @@
             @action="handleMissionAction"
           />
 
+          <!-- 刺杀面板 -->
+          <AssassinationPanel
+            v-else-if="currentPanelType === 'assassination'"
+            :game="gameState"
+            :current-player-id="store.profile?.id || ''"
+            @assassinate="handleAssassinate"
+          />
+
           <!-- 等待指示器 -->
           <ActionWaitingIndicator :players="gameState.players" />
         </div>
@@ -83,13 +91,11 @@
         >
           <span class="section-title">游戏配置</span>
           <div class="options-grid">
-            <span v-if="roomState.options.roles.merlin" class="option-badge">梅林</span>
-            <span v-if="roomState.options.roles.percival" class="option-badge">派西维尔</span>
-            <span v-if="roomState.options.roles.morgana" class="option-badge">莫甘娜</span>
-            <span v-if="roomState.options.roles.mordred" class="option-badge">莫德雷德</span>
-            <span v-if="roomState.options.roles.oberon" class="option-badge">奥伯伦</span>
-            <span v-if="roomState.options.addons.lady_of_lake" class="option-badge">湖中女神</span>
-            <span v-if="roomState.options.addons.excalibur" class="option-badge">圣剑</span>
+            <span v-if="roomState.config.roles.merlin" class="option-badge">梅林</span>
+            <span v-if="roomState.config.roles.percival" class="option-badge">派西维尔</span>
+            <span v-if="roomState.config.roles.morgana" class="option-badge">莫甘娜</span>
+            <span v-if="roomState.config.roles.mordred" class="option-badge">莫德雷德</span>
+            <span v-if="roomState.config.roles.oberon" class="option-badge">奥伯伦</span>
           </div>
         </div>
 
@@ -109,8 +115,9 @@
         v-if="roomState"
         :visible="showGameSettings"
         :room-uuid="roomUuid"
-        :options="roomState.options"
+        :options="roomState.config"
         @close="showGameSettings = false"
+        @update-options="handleUpdateOptions"
       />
 
       <!-- 加载中 -->
@@ -122,24 +129,24 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ middleware: ['auth'] });
-
 import { ref, computed, onMounted, onUnmounted, onBeforeUnmount } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useMainStore } from '~/stores/main';
 import { socket } from '~/composables/useSocket';
-import type { TRoomState, ISocketError, VisualGameState, TVoteOption, TMissionResult } from '~/types';
+import { showToast, showModal, showActionSheet } from '~/composables/useUI';
 import Board from '~/components/board/Board.vue';
 import GameSettings from '~/components/room/GameSettings.vue';
-// 游戏组件
 import GameStateDisplay from '~/components/game/GameStateDisplay.vue';
 import MissionBoard from '~/components/game/MissionBoard.vue';
 import TeamSelectionPanel from '~/components/game/TeamSelectionPanel.vue';
 import VotingPanel from '~/components/game/VotingPanel.vue';
 import MissionActionPanel from '~/components/game/MissionActionPanel.vue';
+import AssassinationPanel from '~/components/game/AssassinationPanel.vue';
 import GameResultDisplay from '~/components/game/GameResultDisplay.vue';
 import ActionWaitingIndicator from '~/components/game/ActionWaitingIndicator.vue';
-import { showToast, showModal, showActionSheet } from '~/composables/useUI';
+import type { TRoomState, ISocketError, VisualGameState, TVoteOption, TMissionResult, GameOptions } from '~/types';
+
+definePageMeta({ middleware: ['auth'] });
 
 const store = useMainStore();
 const router = useRouter();
@@ -149,6 +156,8 @@ const roomState = ref<TRoomState | null>(null);
 const errorMessage = ref<ISocketError | null>(null);
 const showGameSettings = ref<boolean>(false);
 const selectedPlayers = ref<string[]>([]); // 用于selectTeam阶段选择的玩家
+// 游戏状态：由 gameUpdated 事件独立维护，按玩家视角裁剪。
+const gameState = ref<VisualGameState | null>(null);
 
 // 计算属性
 const isRoomLeader = computed(() => {
@@ -158,29 +167,15 @@ const isRoomLeader = computed(() => {
 
 const hasGameOptions = computed(() => {
   if (!roomState.value) return false;
-  const { roles, addons } = roomState.value.options;
-  return [...Object.values(roles), ...Object.values(addons)].some((el) => Boolean(el));
+  const roles = roomState.value.config.roles;
+  return Object.values(roles).some((el) => Boolean(el));
 });
 
 const gameResult = computed(() => {
-  if (roomState.value?.stage === 'started' && roomState.value.game?.result) {
-    return roomState.value.game.result.winner;
+  if (gameState.value?.result) {
+    return gameState.value.result.winner;
   }
   return undefined;
-});
-
-const gamePlayers = computed(() => {
-  if (roomState.value?.stage === 'started' && roomState.value.game?.players) {
-    return roomState.value.game.players;
-  }
-  return [];
-});
-
-const gameState = computed((): VisualGameState | null => {
-  if (roomState.value?.stage === 'started' && roomState.value.game) {
-    return roomState.value.game;
-  }
-  return null;
 });
 
 // 是否可以选择玩家
@@ -215,6 +210,14 @@ const currentPanelType = computed(() => {
   // 游戏结束
   if (stage === 'end') {
     return 'result';
+  }
+
+  // 刺杀阶段：刺客显示刺杀面板
+  if (stage === 'assassinate') {
+    if (currentPlayer?.features.isAssassin) {
+      return 'assassination';
+    }
+    return null;
   }
 
   // 只有需要行动的玩家才显示面板
@@ -275,14 +278,20 @@ if (uuid) {
 const handleRoomUpdated = (state: TRoomState) => {
   if (state.roomID === roomUuid.value) {
     roomState.value = state;
+    // 房间回到 created/locked 时清空游戏状态
+    if (state.stage === 'created' || state.stage === 'locked') {
+      gameState.value = null;
+      selectedPlayers.value = [];
+    }
   }
 };
 
-const handleGameUpdated = (game: any) => {
+const handleGameUpdated = (game: VisualGameState) => {
   if (game.uuid === roomUuid.value && roomState.value?.stage === 'started') {
-    // 更新游戏状态
-    if (roomState.value.stage === 'started') {
-      roomState.value.game = game;
+    gameState.value = game;
+    // 同步本地选中状态与服务器 currentTeam（selectPlayer 由服务端维护）
+    if (game.stage === 'selectTeam') {
+      selectedPlayers.value = [...game.currentTeam];
     }
   }
 };
@@ -393,38 +402,8 @@ const handlePlayerClick = async (playerId: string) => {
     return;
   }
 
-  // 刺杀阶段：点击玩家直接刺杀
+  // 刺杀阶段：由 AssassinationPanel 处理刺杀目标选择，此处不再处理点击。
   if (roomState.value?.stage === 'started' && gameState.value?.stage === 'assassinate') {
-    const currentPlayer = gameState.value.players.find((p) => p.id === store.profile?.id);
-
-    // 只有刺客可以刺杀
-    if (currentPlayer?.features.waitForAction) {
-      // 不能刺杀自己
-      if (playerId === store.profile?.id) {
-        showToast({
-          title: '不能选择自己',
-          icon: 'none',
-          duration: 1500,
-        });
-        return;
-      }
-
-      // 确认刺杀
-      const userState = store.users[playerId];
-      const targetName = userState && 'profile' in userState ? userState.profile.name : '该玩家';
-
-      const res = await showModal({
-        title: '确认刺杀',
-        content: `确定要刺杀 ${targetName} 吗？`,
-        confirmColor: '#ff3b30',
-      });
-      if (res.confirm && roomUuid.value) {
-        // 先选择玩家，再执行刺杀
-        socket.emit('selectPlayer', roomUuid.value, playerId);
-        // 默认刺杀梅林
-        socket.emit('assassinate', roomUuid.value, 'merlin');
-      }
-    }
     return;
   }
 
@@ -486,26 +465,40 @@ const getErrorText = (error: string): string => {
 
 // ============ 游戏事件处理函数 ============
 
-// 发送队伍
+// 发送队伍（submitTeam）：服务端已维护 currentTeam，此处只需提交。
 const handleSendTeam = () => {
-  if (!roomUuid.value || selectedPlayers.value.length === 0) return;
-
-  socket.emit('sentSelectedPlayers', roomUuid.value, selectedPlayers.value);
-  selectedPlayers.value = []; // 清空选择
+  if (!roomUuid.value) return;
+  socket.emit('sentSelectedPlayers', roomUuid.value);
+  selectedPlayers.value = [];
 };
 
 // 投票
 const handleVote = (option: TVoteOption) => {
   if (!roomUuid.value) return;
-
-  socket.emit('vote', roomUuid.value, option);
+  socket.emit('voteForMission', roomUuid.value, option);
 };
 
 // 任务执行
 const handleMissionAction = (result: TMissionResult) => {
   if (!roomUuid.value) return;
+  socket.emit('actionOnMission', roomUuid.value, result);
+};
 
-  socket.emit('mission', roomUuid.value, result);
+// 刺杀
+const handleAssassinate = (targetId: string) => {
+  if (!roomUuid.value) return;
+  socket.emit('assassinate', roomUuid.value, targetId);
+};
+
+// 更新游戏配置
+const handleUpdateOptions = (config: GameOptions) => {
+  if (!roomUuid.value) return;
+  socket.emit('updateOptions', roomUuid.value, config);
+  showToast({
+    title: '设置已保存',
+    icon: 'success',
+    duration: 1500,
+  });
 };
 </script>
 

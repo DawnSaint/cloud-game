@@ -3,6 +3,7 @@ import '../../../server/game/avalon' // side-effect: register Avalon engine
 import { avalonEngine } from '../../../server/game/avalon/engine'
 import {
   applyEvent,
+  initializeRoundRuntime,
   REJECT_LIMIT,
   WINS_REQUIRED,
 } from '../../../server/game/avalon/state-machine'
@@ -441,13 +442,48 @@ describe('handleEvent - missionAction', () => {
 })
 
 describe('handleEvent - 胜负判定', () => {
-  it('连续 3 次任务成功 → stage=end，winner=good', () => {
+  it('连续 3 次任务成功 → 进入刺杀阶段 assassinate', () => {
     let { state } = seed(5, 'p1')
     for (let i = 0; i < WINS_REQUIRED; i++) {
       state = playOneMission(state)
     }
-    expect(state.stage).toBe('end')
-    expect(state.result).toEqual({ winner: 'good', reason: 'goodTeamMissions' })
+    expect(state.stage).toBe('assassinate')
+  })
+
+  it('刺杀阶段：刺客刺杀非梅林 → stage=end，winner=good，reason=missMerlin', () => {
+    // 启用梅林角色；用 initializeRoundRuntime 重建干净的 selectTeam 初始状态
+    const { state: base } = avalonEngine.createGame('room-1', players(5), { roles: { merlin: 1 } })
+    const clean = initializeRoundRuntime(base, 'p1')
+    let state = clean
+    for (let i = 0; i < WINS_REQUIRED; i++) {
+      state = playOneMission(state)
+    }
+    expect(state.stage).toBe('assassinate')
+    const assassin = state.players.find(p => p.features.isAssassin)!
+    // 选择一个非梅林的目标（忠臣 servant）
+    const nonMerlin = state.players.find(p => p.role === 'servant')!
+    const r = applyEvent(state, { type: 'assassinate', targetId: nonMerlin.id }, assassin.id)
+    expect('error' in r).toBe(false)
+    if ('error' in r) return
+    expect(r.state.stage).toBe('end')
+    expect(r.state.result).toEqual({ winner: 'good', reason: 'missMerlin' })
+  })
+
+  it('刺杀阶段：刺客刺杀梅林 → stage=end，winner=evil，reason=killMerlin', () => {
+    const { state: base } = avalonEngine.createGame('room-1', players(5), { roles: { merlin: 1 } })
+    const clean = initializeRoundRuntime(base, 'p1')
+    let state = clean
+    for (let i = 0; i < WINS_REQUIRED; i++) {
+      state = playOneMission(state)
+    }
+    expect(state.stage).toBe('assassinate')
+    const assassin = state.players.find(p => p.features.isAssassin)!
+    const merlin = state.players.find(p => p.role === 'merlin')!
+    const r = applyEvent(state, { type: 'assassinate', targetId: merlin.id }, assassin.id)
+    expect('error' in r).toBe(false)
+    if ('error' in r) return
+    expect(r.state.stage).toBe('end')
+    expect(r.state.result).toEqual({ winner: 'evil', reason: 'killMerlin' })
   })
 
   it('连续 3 次任务失败 → stage=end，winner=evil', () => {

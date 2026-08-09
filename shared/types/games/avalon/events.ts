@@ -16,6 +16,7 @@ export type TAvalonEvent =
   | { type: 'submitTeam' }
   | { type: 'castVote', option: TVoteOption }
   | { type: 'missionAction', result: TMissionResult }
+  | { type: 'assassinate', targetId: string }
 
 /**
  * Result of applying an event: either a new immutable state or a

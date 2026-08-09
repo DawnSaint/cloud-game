@@ -42,6 +42,8 @@ export const avalonEngine: TGameEngine = {
         id: a.playerId,
         // 服务端权威状态保留真实角色；按玩家视角的裁剪由 visibility map 驱动。
         role: a.role,
+        // 忠诚度仅在服务端权威状态保留，用于刺杀阶段判定；客户端通过 assassinate 阶段揭示。
+        loyalty: a.loyalty,
         features: {},
       })),
     }
@@ -61,10 +63,16 @@ export const avalonEngine: TGameEngine = {
   getVisualState(state: AvalonGameState, inputs: TGameVisualInputs): AvalonGameState {
     const { playerId, visibility } = inputs
     const revealAll = state.stage === 'end'
+    // 刺杀阶段：向所有玩家揭示忠诚度（good/evil），方便刺客阵营协商目标；
+    // 真实角色仍隐藏，直到 end 阶段才完全揭示。
+    const revealLoyalty = state.stage === 'assassinate'
     const roleFor = (targetId: string): TVisibleRole => {
       if (revealAll) return state.players.find(p => p.id === targetId)!.role
       if (targetId === playerId) {
         return state.players.find(p => p.id === targetId)!.role
+      }
+      if (revealLoyalty) {
+        return state.players.find(p => p.id === targetId)!.loyalty ?? 'unknown'
       }
       return visibility[playerId]?.[targetId] ?? 'unknown'
     }

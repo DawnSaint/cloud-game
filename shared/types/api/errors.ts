@@ -46,9 +46,29 @@ export interface IRoomNotLeaderError extends ISocketError {
   error: 'errorNotLeader';
 }
 
+export interface IRoomNotStartedError extends ISocketError {
+  error: 'errorGameAlreadyStarted';
+}
+
+export interface IGameNotFoundError extends ISocketError {
+  error: 'errorNoGame';
+}
+
+export interface IEngineNotFoundError extends ISocketError {
+  error: 'errorNoEngine';
+}
+
+export interface IPlayerCountError extends ISocketError {
+  error: 'errorPlayerCount';
+}
+
 export type RoomError =
   | IRoomUnavailableError
   | IRoomLockedError
   | IRoomAlreadyInError
   | IRoomNotInError
-  | IRoomNotLeaderError;
+  | IRoomNotLeaderError
+  | IRoomNotStartedError
+  | IGameNotFoundError
+  | IEngineNotFoundError
+  | IPlayerCountError;

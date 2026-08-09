@@ -58,9 +58,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { socket } from '~/composables/useSocket';
 import type { GameOptions, GameOptionsRoles } from '~/types';
-import { showToast } from '~/composables/useUI';
 
 interface Props {
   visible: boolean;
@@ -71,6 +69,7 @@ interface Props {
 const props = defineProps<Props>();
 const emit = defineEmits<{
   close: [];
+  updateOptions: [config: GameOptions];
 }>();
 
 // 本地选项副本
@@ -112,30 +111,6 @@ const evilRoles: RoleOption[] = [
   { key: 'lunatic', name: '疯子' },
 ];
 
-// 扩展配置
-const addons = [
-  {
-    key: 'lady_of_lake',
-    name: '湖中女神',
-    desc: '可以查看其他玩家的阵营',
-  },
-  {
-    key: 'excalibur',
-    name: '圣剑',
-    desc: '领袖可以使用圣剑强制任务成功',
-  },
-  {
-    key: 'lady_of_sea',
-    name: '海之女神',
-    desc: '湖中女神的变体版本',
-  },
-  {
-    key: 'plot_cards',
-    name: '阴谋卡牌',
-    desc: '增加特殊能力卡牌',
-  },
-];
-
 // 切换角色
 const toggleRole = (roleKey: keyof GameOptionsRoles) => {
   localOptions.value.roles[roleKey] = localOptions.value.roles[roleKey] ? undefined : 1;
@@ -146,14 +121,9 @@ const handleClose = () => {
   emit('close');
 };
 
-// 保存设置
+// 保存设置：通知父组件更新配置，并关闭弹窗。
 const handleSave = () => {
-  socket.emit('updateOptions', props.roomUuid, localOptions.value);
-  showToast({
-    title: '设置已保存',
-    icon: 'success',
-    duration: 1500,
-  });
+  emit('updateOptions', localOptions.value);
   emit('close');
 };
 </script>

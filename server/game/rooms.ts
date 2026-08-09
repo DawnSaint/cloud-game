@@ -56,6 +56,11 @@ export function getRoom(uuid: string): TRoomState | undefined {
   return rooms.get(uuid)
 }
 
+/** 替换房间状态（用于游戏配置更新、游戏启动等需要整体替换的场景）。 */
+export function setRoom(uuid: string, state: TRoomState): void {
+  rooms.set(uuid, state)
+}
+
 /**
  * Create a room with the given creator as leader and first player.
  * gameType is hardcoded to 'avalon' (single-game era; will be widened when a
