@@ -5,9 +5,20 @@ import { setIO } from '../utils/socket'
 import { verifyJWT } from '../utils/auth'
 import * as userService from '../db/user'
 import * as rooms from '../game/rooms'
+import * as instances from '../game/instances'
 import { registerRoomHandlers } from '../game/rooms/handlers'
 
 const SOCKET_PORT = Number(process.env.SOCKET_PORT) || 3200
+
+/** 查找玩家当前所在的房间 id（遍历房间列表匹配玩家 id）。 */
+function findRoomIdForUser(userId: string): string | undefined {
+  for (const [uuid, state] of rooms.allRooms()) {
+    if (state.players.some(p => p.id === userId)) {
+      return uuid
+    }
+  }
+  return undefined
+}
 
 let httpServer: HttpServer | null = null
 
@@ -62,6 +73,22 @@ export default definePlugin(() => {
         cb(profile)
       }
     })
+
+    // 断线重连：若玩家所在房间正在进行游戏，重新推送当前游戏状态。
+    if (userId) {
+      const roomId = findRoomIdForUser(userId)
+      if (roomId) {
+        // 重连时自动重新加入房间频道，确保后续广播可达。
+        void socket.join(roomId)
+        rooms.trackSocketInRoom(socket.id, roomId)
+        // 推送房间状态 + 游戏状态（若游戏进行中）。
+        const room = rooms.getRoom(roomId)
+        if (room) {
+          socket.emit('roomUpdated', room)
+          instances.broadcastGameTo(roomId, userId)
+        }
+      }
+    }
 
     if (userId) {
       socket.on('getMyProfile', async (cb) => {

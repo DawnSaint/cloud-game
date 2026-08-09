@@ -4,7 +4,6 @@ import type {
   TRoomState,
   TRoomInfo,
   TGameConfig,
-  RoomPlayer,
 } from '../../shared/types/common/room'
 import type { RoomError } from '../../shared/types/api/errors'
 
@@ -61,6 +60,11 @@ export function setRoom(uuid: string, state: TRoomState): void {
   rooms.set(uuid, state)
 }
 
+/** 遍历所有房间（用于断线重连时查找玩家所在房间）。 */
+export function allRooms(): Map<string, TRoomState> {
+  return rooms
+}
+
 /**
  * Create a room with the given creator as leader and first player.
  * gameType is hardcoded to 'avalon' (single-game era; will be widened when a
@@ -106,7 +110,7 @@ export async function joinRoom(
 export async function leaveRoom(
   roomId: string,
   playerId: string,
-): Promise<void | RoomError> {
+): Promise<RoomError | undefined> {
   const state = rooms.get(roomId)
   if (!state) {
     return { error: 'errorNotFound' }
@@ -160,7 +164,7 @@ export async function kickPlayer(
   roomId: string,
   requesterId: string,
   targetId: string,
-): Promise<void | RoomError> {
+): Promise<RoomError | undefined> {
   const state = rooms.get(roomId)
   if (!state) {
     return { error: 'errorNotFound' }
