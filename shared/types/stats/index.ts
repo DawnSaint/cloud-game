@@ -1,5 +1,15 @@
 import type { TOptionalRoles } from '../games/avalon/roles';
 
+export type {
+  TAchievementDef,
+  TAchievementType,
+  TUserAchievement,
+  TGetAllAchievementsResponse,
+  TGetUserAchievementsResponse,
+  TAchievementUnlockedPayload,
+  TAchievementProgressPayload,
+} from './achievement';
+
 export type TTotalWinrateStats = {
   total: TWinrateStats;
   byPlayers: (TWinrateStats & { playerCount: number })[];

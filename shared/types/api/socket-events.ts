@@ -3,6 +3,7 @@ import type { Socket as SuperSocket } from 'socket.io-client';
 
 import type { CommonClientToServerEvents, CommonServerToClientEvents } from './common-events';
 import type { AvalonClientToServerEvents, AvalonServerToClientEvents } from './avalon-events';
+import type { AchievementClientToServerEvents, AchievementServerToClientEvents } from './achievement-events';
 
 export type {
   ISocketError,
@@ -35,9 +36,14 @@ export type {
   AvalonClientToServerEvents,
 } from './avalon-events';
 
-export interface ServerToClientEvents extends CommonServerToClientEvents, AvalonServerToClientEvents {}
+export type {
+  AchievementServerToClientEvents,
+  AchievementClientToServerEvents,
+} from './achievement-events';
 
-export interface ClientToServerEvents extends CommonClientToServerEvents, AvalonClientToServerEvents {}
+export interface ServerToClientEvents extends CommonServerToClientEvents, AvalonServerToClientEvents, AchievementServerToClientEvents {}
+
+export interface ClientToServerEvents extends CommonClientToServerEvents, AvalonClientToServerEvents, AchievementClientToServerEvents {}
 
 export type Server = SuperServer<ClientToServerEvents, ServerToClientEvents>;
 export type Socket = SuperSocket<ServerToClientEvents, ClientToServerEvents>;

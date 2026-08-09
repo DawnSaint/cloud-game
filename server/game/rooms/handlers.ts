@@ -3,10 +3,13 @@ import type {
   TRoomState,
   TVoteOption,
   TMissionResult,
+  TGetAllAchievementsResponse,
+  TGetUserAchievementsResponse,
 } from '../../../shared/types'
 import type { RoomError } from '../../../shared/types/api/errors'
 import * as rooms from '../rooms'
 import * as instances from '../instances'
+import * as achievements from '../achievements'
 import type { TRoomsList } from '../../../shared/types/common/room-list'
 
 type ServerSocket = Socket<Record<string, never>, Record<string, never>, Record<string, never>, Record<string, never>>
@@ -158,5 +161,15 @@ export function registerRoomHandlers(_io: IOServer, socket: ServerSocket): void 
     if ('error' in result) {
       emitError(socket, result.error)
     }
+  })
+
+  // ==================== 成就事件 ====================
+
+  socket.on('getAllAchievements', (cb: (res: TGetAllAchievementsResponse) => void) => {
+    cb(achievements.getAllAchievements())
+  })
+
+  socket.on('getUserAchievements', (userId: string, cb: (res: TGetUserAchievementsResponse) => void) => {
+    cb(achievements.getUserAchievements(userId))
   })
 }

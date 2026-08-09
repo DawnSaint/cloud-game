@@ -69,6 +69,15 @@ export type { IAvatarInfo } from './user/avatars';
 
 // Stats types
 export type { TTotalWinrateStats, TWinrateStats, TRoleStats } from './stats';
+export type {
+  TAchievementDef,
+  TAchievementType,
+  TUserAchievement,
+  TGetAllAchievementsResponse,
+  TGetUserAchievementsResponse,
+  TAchievementUnlockedPayload,
+  TAchievementProgressPayload,
+} from './stats';
 
 // API types
 export type {
