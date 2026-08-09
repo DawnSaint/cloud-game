@@ -28,7 +28,7 @@ function toRoomInfo(state: TRoomState): TRoomInfo {
   }
   if (state.stage === 'started') {
     info.startAt = state.startAt
-    if (state.game.result) {
+    if ('game' in state && state.game?.result) {
       info.result = state.game.result
     }
   }
@@ -36,7 +36,7 @@ function toRoomInfo(state: TRoomState): TRoomInfo {
 }
 
 /** Broadcast full state to room + fresh list to lobby. */
-function broadcastRoom(state: TRoomState): void {
+export function broadcastRoom(state: TRoomState): void {
   const io = getIO()
   io.to(state.roomID).emit('roomUpdated', state)
   io.to(LOBBY_CHANNEL).emit('roomsListUpdated', listRooms())

@@ -109,55 +109,55 @@ export function registerRoomHandlers(_io: IOServer, socket: ServerSocket): void 
     }
   })
 
-  socket.on('updateOptions', (uuid: string, config: TRoomState['config']) => {
+  socket.on('updateOptions', async (uuid: string, config: TRoomState['config']) => {
     const uid = requireUserId(socket)
     if (!uid) return
-    const result = instances.updateGameOptions(uuid, uid, config)
+    const result = await instances.updateGameOptions(uuid, uid, config)
     if (result && 'error' in result) {
       emitError(socket, result.error)
     }
   })
 
-  socket.on('selectPlayer', (uuid: string, playerId: string) => {
+  socket.on('selectPlayer', async (uuid: string, playerId: string) => {
     const uid = requireUserId(socket)
     if (!uid) return
-    const result = instances.handleGameEvent(uuid, uid, { type: 'selectPlayer', playerId })
+    const result = await instances.handleGameEvent(uuid, uid, { type: 'selectPlayer', playerId })
     if ('error' in result) {
       emitError(socket, result.error)
     }
   })
 
-  socket.on('sentSelectedPlayers', (uuid: string) => {
+  socket.on('sentSelectedPlayers', async (uuid: string) => {
     const uid = requireUserId(socket)
     if (!uid) return
-    const result = instances.handleGameEvent(uuid, uid, { type: 'submitTeam' })
+    const result = await instances.handleGameEvent(uuid, uid, { type: 'submitTeam' })
     if ('error' in result) {
       emitError(socket, result.error)
     }
   })
 
-  socket.on('voteForMission', (uuid: string, option: TVoteOption) => {
+  socket.on('voteForMission', async (uuid: string, option: TVoteOption) => {
     const uid = requireUserId(socket)
     if (!uid) return
-    const result = instances.handleGameEvent(uuid, uid, { type: 'castVote', option })
+    const result = await instances.handleGameEvent(uuid, uid, { type: 'castVote', option })
     if ('error' in result) {
       emitError(socket, result.error)
     }
   })
 
-  socket.on('actionOnMission', (uuid: string, result: TMissionResult) => {
+  socket.on('actionOnMission', async (uuid: string, result: TMissionResult) => {
     const uid = requireUserId(socket)
     if (!uid) return
-    const outcome = instances.handleGameEvent(uuid, uid, { type: 'missionAction', result })
+    const outcome = await instances.handleGameEvent(uuid, uid, { type: 'missionAction', result })
     if ('error' in outcome) {
       emitError(socket, outcome.error)
     }
   })
 
-  socket.on('assassinate', (uuid: string, targetId: string) => {
+  socket.on('assassinate', async (uuid: string, targetId: string) => {
     const uid = requireUserId(socket)
     if (!uid) return
-    const result = instances.handleGameEvent(uuid, uid, { type: 'assassinate', targetId })
+    const result = await instances.handleGameEvent(uuid, uid, { type: 'assassinate', targetId })
     if ('error' in result) {
       emitError(socket, result.error)
     }

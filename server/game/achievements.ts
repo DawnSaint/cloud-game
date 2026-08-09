@@ -5,7 +5,7 @@ import type {
   TGetUserAchievementsResponse,
   TAchievementUnlockedPayload,
   TAchievementProgressPayload,
-} from '../../shared/types/stats/achievement'
+} from '../../../shared/types/stats/achievement'
 
 /**
  * 成就系统：管理成就定义与玩家进度。
@@ -48,10 +48,9 @@ const ACHIEVEMENTS: TAchievementDef[] = [
   {
     id: 'assassin',
     name: '刺客',
-    description: '以刺客身份成功刺杀梅林 3 次',
+    description: '成功刺杀梅林 3 次',
     type: 'hidden',
     requirement: 3,
-    metadata: { roles: ['minion'] },
   },
   {
     id: 'centurion',
@@ -110,8 +109,12 @@ export function recordGameResult(
     let increment = 0
     let stateUpdate: Record<string, boolean> | undefined
 
+    // 刺客刺杀成就（独立于胜负，仅看是否成功刺杀梅林）
+    if (def.id === 'assassin' && isAssassinKill) {
+      increment = 1
+    }
     // 通用胜场成就
-    if (def.id === 'first_win' || def.id === 'centurion') {
+    else if (def.id === 'first_win' || def.id === 'centurion') {
       if (won) increment = 1
     }
     // 阵营胜场成就
@@ -126,10 +129,6 @@ export function recordGameResult(
       if (won) increment = 1
       // 详细进度：标记该角色已完成
       stateUpdate = { ...current?.state, [role]: true }
-    }
-    // 刺客刺杀成就
-    else if (def.id === 'assassin' && isAssassinKill) {
-      increment = 1
     }
 
     if (increment <= 0 && !stateUpdate) continue

@@ -1,6 +1,5 @@
 import { getIO } from '../utils/socket'
 import { getGameEngine } from './registry'
-import * as rooms from './rooms'
 import * as userService from '../db/user'
 import type { TGameConfig } from '../../../shared/types/common/game'
 import type { TRoomState } from '../../../shared/types/common/room'
@@ -8,6 +7,14 @@ import type { AvalonGameState } from '../../../shared/types/games/avalon/state'
 import type { TAvalonEvent, TAvalonEventResult } from '../../../shared/types/games/avalon/events'
 import type { TVisibilityMap } from './registry'
 import type { RoomError } from '../../../shared/types/api/errors'
+
+/**
+ * 动态获取 rooms 模块，确保在测试 resetModules 后与测试用例导入的
+ * rooms 模块实例一致（避免因模块缓存导致函数引用丢失）。
+ */
+async function getRooms() {
+  return await import('./rooms')
+}
 
 /**
  * 每局游戏的权威状态：包含服务端保留的真实角色，以及首夜可见性地图。
@@ -32,7 +39,8 @@ export function deleteInstance(roomId: string): void {
 }
 
 /** 向房间内每个玩家广播其视角裁剪后的游戏状态。 */
-function broadcastGame(roomId: string): void {
+async function broadcastGame(roomId: string): Promise<void> {
+  const rooms = await getRooms()
   const instance = instances.get(roomId)
   const room = rooms.getRoom(roomId)
   if (!instance || !room) return
@@ -52,7 +60,8 @@ function broadcastGame(roomId: string): void {
 }
 
 /** 仅向指定玩家广播其视角（用于错误恢复后单播）。 */
-export function broadcastGameTo(roomId: string, playerId: string): void {
+export async function broadcastGameTo(roomId: string, playerId: string): Promise<void> {
+  const rooms = await getRooms()
   const instance = instances.get(roomId)
   const room = rooms.getRoom(roomId)
   if (!instance || !room) return
@@ -77,6 +86,7 @@ export async function startGame(
   roomId: string,
   requesterId: string,
 ): Promise<RoomError | undefined> {
+  const rooms = await getRooms()
   const room = rooms.getRoom(roomId)
   if (!room) {
     return { error: 'errorNotFound' }
@@ -124,18 +134,19 @@ export async function startGame(
 
   // 广播房间状态更新（不含游戏细节）+ 每个玩家的游戏视角。
   rooms.broadcastRoom(startedRoom)
-  broadcastGame(roomId)
+  await broadcastGame(roomId)
 }
 
 /**
  * 处理单个游戏事件：校验房间与实例存在，调用引擎 handleEvent，
  * 成功则更新权威状态并广播 gameUpdated；失败则向行动者单播 serverError。
  */
-export function handleGameEvent(
+export async function handleGameEvent(
   roomId: string,
   actorId: string,
   event: TAvalonEvent,
-): TAvalonEventResult | { error: 'errorNoGame' | 'errorNotInRoom' | 'errorNoEngine' } {
+): Promise<TAvalonEventResult | { error: 'errorNoGame' | 'errorNotInRoom' | 'errorNoEngine' }> {
+  const rooms = await getRooms()
   const instance = instances.get(roomId)
   if (!instance) {
     return { error: 'errorNoGame' }
@@ -170,7 +181,7 @@ export function handleGameEvent(
   const mergedState: AvalonGameState = { ...result.state, players: mergedPlayers }
   instance.state = mergedState
 
-  broadcastGame(roomId)
+  await broadcastGame(roomId)
 
   return { state: mergedState }
 }
@@ -178,11 +189,12 @@ export function handleGameEvent(
 /**
  * 更新房间的游戏配置（角色开关等）。仅房主可在 created/locked 阶段调用。
  */
-export function updateGameOptions(
+export async function updateGameOptions(
   roomId: string,
   requesterId: string,
   config: TGameConfig,
-): RoomError | undefined {
+): Promise<RoomError | undefined> {
+  const rooms = await getRooms()
   const room = rooms.getRoom(roomId)
   if (!room) {
     return { error: 'errorNotFound' }
