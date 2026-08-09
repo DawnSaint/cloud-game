@@ -74,13 +74,37 @@ describe('assignRoles — 角色分配', () => {
   })
 })
 
-describe('assignRoles — 不支持角色', () => {
-  it('配置 oberon 抛 InvalidGameConfigError', () => {
-    expect(() => assignRoles(ids(5), { roles: { oberon: 1 } })).toThrow(InvalidGameConfigError)
+describe('assignRoles — v0.1.10 新增角色', () => {
+  it('配置 mordred 成功分配（邪恶方名额足够）', () => {
+    const { assignment } = assignRoles(ids(7), { roles: { mordred: 1 } })
+    expect(assignment.some(a => a.role === 'mordred')).toBe(true)
   })
 
-  it('配置 mordred 抛 InvalidGameConfigError', () => {
-    expect(() => assignRoles(ids(7), { roles: { mordred: 1 } })).toThrow(InvalidGameConfigError)
+  it('配置 oberon 成功分配（邪恶方名额足够）', () => {
+    const { assignment } = assignRoles(ids(5), { roles: { oberon: 1 } })
+    expect(assignment.some(a => a.role === 'oberon')).toBe(true)
+  })
+
+  it('mordred + merlin + morgana + percival 组合可分配', () => {
+    const { assignment, settings } = assignRoles(ids(7), {
+      roles: { merlin: 1, percival: 1, morgana: 1, mordred: 1, oberon: 1 },
+    })
+    const roles = assignment.map(a => a.role)
+    expect(roles).toContain('merlin')
+    expect(roles).toContain('mordred')
+    expect(roles).toContain('oberon')
+    expect(settings.roles.evil).toContain('mordred')
+    expect(settings.roles.evil).toContain('oberon')
+  })
+})
+
+describe('assignRoles — 仍不支持的角色', () => {
+  it('配置 guinevere 抛 InvalidGameConfigError', () => {
+    expect(() => assignRoles(ids(5), { roles: { guinevere: 1 } })).toThrow(InvalidGameConfigError)
+  })
+
+  it('配置 evilLancelot 抛 InvalidGameConfigError', () => {
+    expect(() => assignRoles(ids(7), { roles: { evilLancelot: 1 } })).toThrow(InvalidGameConfigError)
   })
 })
 

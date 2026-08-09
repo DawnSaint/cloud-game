@@ -50,7 +50,21 @@ export const AVALON_ROLES: Record<TRoles, TAvalonRoleData> = {
     visibility: { morgana: 'evil', minion: 'evil' },
   },
 
-  // 以下角色 v0.1.6 暂未实现，占位以满足 Record<TRoles> 索引签名。
+  // v0.1.10 新增：莫德雷德（梅林看不到他）与奥伯伦（邪恶方互不可见）。
+  mordred: {
+    role: 'mordred',
+    loyalty: 'evil',
+    // 莫德雷德：邪恶方互见；梅林看不到莫德雷德（他不出现在梅林的视野中）。
+    visibility: { morgana: 'evil', minion: 'evil' },
+  },
+  oberon: {
+    role: 'oberon',
+    loyalty: 'evil',
+    // 奥伯伦：看不到其他邪恶方，其他邪恶方也看不到他（首夜互不可见）。
+    visibility: {},
+  },
+
+  // 以下角色 v0.1.10 暂未实现，占位以满足 Record<TRoles> 索引签名。
   // assignRoles 会在命中时抛出「暂不支持」，配置阶段即拒绝。
   merlinPure: { role: 'merlinPure', loyalty: 'good', visibility: {} },
   tristan: { role: 'tristan', loyalty: 'good', visibility: {} },
@@ -59,8 +73,6 @@ export const AVALON_ROLES: Record<TRoles, TAvalonRoleData> = {
   guinevere: { role: 'guinevere', loyalty: 'good', visibility: {} },
   troublemaker: { role: 'troublemaker', loyalty: 'good', visibility: {} },
   cleric: { role: 'cleric', loyalty: 'good', visibility: {} },
-  oberon: { role: 'oberon', loyalty: 'evil', visibility: {} },
-  mordred: { role: 'mordred', loyalty: 'evil', visibility: {} },
   evilLancelot: { role: 'evilLancelot', loyalty: 'evil', visibility: {} },
   trickster: { role: 'trickster', loyalty: 'evil', visibility: {} },
   lunatic: { role: 'lunatic', loyalty: 'evil', visibility: {} },
@@ -70,11 +82,13 @@ export const AVALON_ROLES: Record<TRoles, TAvalonRoleData> = {
   wraith: { role: 'wraith', loyalty: 'evil', visibility: {} },
 }
 
-/** Roles actually playable in v0.1.6. Configs referencing others are rejected. */
+/** Roles actually playable in v0.1.10. Configs referencing others are rejected. */
 export const SUPPORTED_ROLES: ReadonlySet<TRoles> = new Set<TRoles>([
   'merlin',
   'percival',
   'servant',
   'morgana',
   'minion',
+  'mordred',
+  'oberon',
 ])

@@ -15,7 +15,7 @@
         <!-- 游戏棋盘 -->
 
         <Board
-          :players="roomState.stage === 'started' ? gamePlayers : roomState.players"
+          :players="roomState.stage === 'started' && gameState ? gameState.players : roomState.players"
           :room-stage="roomState.stage"
           :display-player-index="roomState.stage === 'started'"
           :game-result="gameResult"
