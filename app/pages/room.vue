@@ -38,6 +38,31 @@
 
         <!-- 游戏组件区域（游戏进行中） -->
         <div v-if="roomState.stage === 'started' && gameState" class="game-components">
+          <!-- 首夜角色揭示遮罩 -->
+          <div v-if="showRoleReveal" class="role-reveal-overlay" @click="dismissRoleReveal">
+            <div class="role-reveal-card" @click.stop>
+              <div class="reveal-header">
+                <span class="reveal-title">你的角色</span>
+                <span class="reveal-countdown">{{ roleRevealCountdown }}s</span>
+              </div>
+              <div class="reveal-role">
+                <RoleRevealCard
+                  v-if="gameState && store.profile"
+                  :player="gameState.players.find(p => p.id === store.profile?.id)!"
+                />
+              </div>
+              <div v-if="visibleRoles.length > 0" class="reveal-visibility">
+                <span class="visibility-title">首夜信息</span>
+                <div class="visibility-list">
+                  <div v-for="vr in visibleRoles" :key="vr.id" class="visibility-item">
+                    <span class="visibility-role">{{ vr.role }}</span>
+                  </div>
+                </div>
+              </div>
+              <button class="reveal-dismiss" @click="dismissRoleReveal">我已记住</button>
+            </div>
+          </div>
+
           <!-- 游戏状态显示 -->
           <GameStateDisplay :state="gameState" />
 
@@ -144,6 +169,7 @@ import MissionActionPanel from '~/components/game/MissionActionPanel.vue';
 import AssassinationPanel from '~/components/game/AssassinationPanel.vue';
 import GameResultDisplay from '~/components/game/GameResultDisplay.vue';
 import ActionWaitingIndicator from '~/components/game/ActionWaitingIndicator.vue';
+import RoleRevealCard from '~/components/game/RoleRevealCard.vue';
 import type { TRoomState, ISocketError, VisualGameState, TVoteOption, TMissionResult, GameOptions } from '~/types';
 
 definePageMeta({ middleware: ['auth'] });
@@ -158,6 +184,18 @@ const showGameSettings = ref<boolean>(false);
 const selectedPlayers = ref<string[]>([]); // 用于selectTeam阶段选择的玩家
 // 游戏状态：由 gameUpdated 事件独立维护，按玩家视角裁剪。
 const gameState = ref<VisualGameState | null>(null);
+// 首夜角色揭示：游戏开始时展示玩家角色与可见性信息，倒计时后进入第一轮。
+const showRoleReveal = ref<boolean>(false);
+const roleRevealCountdown = ref<number>(0);
+let roleRevealTimer: ReturnType<typeof setInterval> | null = null;
+
+// 当前玩家在游戏中的首夜可见性信息（其他玩家可见的角色）
+const visibleRoles = computed(() => {
+  if (!gameState.value || !store.profile) return [] as Array<{ id: string, role: string }>;
+  return gameState.value.players
+    .filter(p => p.id !== store.profile?.id)
+    .map(p => ({ id: p.id, role: p.role }));
+});
 
 // 计算属性
 const isRoomLeader = computed(() => {
@@ -288,11 +326,43 @@ const handleRoomUpdated = (state: TRoomState) => {
 
 const handleGameUpdated = (game: VisualGameState) => {
   if (game.uuid === roomUuid.value && roomState.value?.stage === 'started') {
+    const previousStage = gameState.value?.stage;
     gameState.value = game;
     // 同步本地选中状态与服务器 currentTeam（selectPlayer 由服务端维护）
     if (game.stage === 'selectTeam') {
       selectedPlayers.value = [...game.currentTeam];
     }
+    // 首次进入 selectTeam 阶段时触发首夜角色揭示（从其他阶段转入时）。
+    if (game.stage === 'selectTeam' && previousStage !== 'selectTeam' && previousStage !== 'initialization') {
+      triggerRoleReveal();
+    }
+  }
+};
+
+// 触发首夜角色揭示：展示角色与可见性信息，倒计时后自动关闭。
+const REVEAL_DURATION = 5; // 秒
+const triggerRoleReveal = () => {
+  if (showRoleReveal.value) return;
+  showRoleReveal.value = true;
+  roleRevealCountdown.value = REVEAL_DURATION;
+  if (roleRevealTimer) clearInterval(roleRevealTimer);
+  roleRevealTimer = setInterval(() => {
+    roleRevealCountdown.value -= 1;
+    if (roleRevealCountdown.value <= 0) {
+      showRoleReveal.value = false;
+      if (roleRevealTimer) {
+        clearInterval(roleRevealTimer);
+        roleRevealTimer = null;
+      }
+    }
+  }, 1000);
+};
+
+const dismissRoleReveal = () => {
+  showRoleReveal.value = false;
+  if (roleRevealTimer) {
+    clearInterval(roleRevealTimer);
+    roleRevealTimer = null;
   }
 };
 
@@ -328,6 +398,10 @@ onUnmounted(() => {
   socket.off('gameUpdated', handleGameUpdated);
   socket.off('restartGame', handleRestartGame);
   socket.off('destroyRoom', handleDestroyRoom);
+  if (roleRevealTimer) {
+    clearInterval(roleRevealTimer);
+    roleRevealTimer = null;
+  }
 });
 
 // Cleanup when leaving the room (replaces onUnload)
@@ -701,5 +775,112 @@ const handleUpdateOptions = (config: GameOptions) => {
   color: $text-white;
   font-weight: 500;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+// 首夜角色揭示遮罩
+.role-reveal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.role-reveal-card {
+  width: 100%;
+  max-width: 360px;
+  background-color: $bg;
+  border-radius: $radius-xlarge;
+  padding: $spacing-xl;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+  animation: scaleIn 0.3s ease;
+}
+
+.reveal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.reveal-title {
+  font-size: $font-xl;
+  font-weight: bold;
+  color: $text-primary;
+}
+
+.reveal-countdown {
+  font-size: $font-lg;
+  color: $primary;
+  font-weight: bold;
+}
+
+.reveal-role {
+  display: flex;
+  justify-content: center;
+}
+
+.reveal-visibility {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.visibility-title {
+  font-size: $font-md;
+  font-weight: bold;
+  color: $text-secondary;
+}
+
+.visibility-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.visibility-item {
+  padding: $spacing-xs $spacing-sm;
+  background-color: $loyalty-good-bg;
+  border-radius: $radius-small;
+}
+
+.visibility-role {
+  font-size: $font-sm;
+  color: $text-primary;
+}
+
+.reveal-dismiss {
+  height: 44px;
+  border-radius: $radius-large;
+  background-color: $primary;
+  color: $text-white;
+  font-size: $font-lg;
+  font-weight: 600;
+  border: none;
+  transition: opacity $transition-normal;
+}
+
+.reveal-dismiss:active {
+  opacity: 0.7;
+}
+
+.reveal-dismiss::after {
+  border: none;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 </style>
